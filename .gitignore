@@ -1,5 +1,6 @@
 # Internal files - private, not for public GitHub
 .internal/
+PROJECT_CONTEXT.md
 
 # Editor files
 .vscode/
