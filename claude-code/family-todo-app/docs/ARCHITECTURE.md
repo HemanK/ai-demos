@@ -102,12 +102,12 @@ graph TB
     TM --> LS
     LS --> Export
 
-    style AF fill:#e1f5ff
-    style TMA fill:#b3e5fc
-    style SP fill:#81d4fa
-    style CW fill:#81d4fa
-    style RA fill:#81d4fa
-    style TC fill:#81d4fa
+    style AF fill:#e1f5ff,stroke:#01579b,stroke-width:2px,color:#000
+    style TMA fill:#b3e5fc,stroke:#01579b,stroke-width:2px,color:#000
+    style SP fill:#81d4fa,stroke:#01579b,stroke-width:2px,color:#000
+    style CW fill:#81d4fa,stroke:#01579b,stroke-width:2px,color:#000
+    style RA fill:#81d4fa,stroke:#01579b,stroke-width:2px,color:#000
+    style TC fill:#81d4fa,stroke:#01579b,stroke-width:2px,color:#000
 ```
 
 ### Architecture Principles
@@ -165,11 +165,11 @@ graph TD
     Combine --> AppCore
     AppCore --> UserResponse[Update UI]
 
-    style TMA fill:#ffd54f
-    style SP fill:#81c784
-    style CW fill:#81c784
-    style RA fill:#81c784
-    style TC fill:#81c784
+    style TMA fill:#ffd54f,stroke:#f57f17,stroke-width:2px,color:#000
+    style SP fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
+    style CW fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
+    style RA fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
+    style TC fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
 ```
 
 ### Agent Communication Patterns
@@ -273,14 +273,17 @@ flowchart TD
     TriggerRiskAnalysis --> ShowRisk[Display risk if high]
     ShowRisk --> End[Done]
 
-    style SmartParser fill:#81c784
-    style CategoryWizard fill:#81c784
-    style TriggerRiskAnalysis fill:#81c784
+    style SmartParser fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
+    style CategoryWizard fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
+    style TriggerRiskAnalysis fill:#81c784,stroke:#2e7d32,stroke-width:2px,color:#000
 ```
 
 ### Agent Class Structure
 
+**Language**: JavaScript (ES6+) - Vanilla JavaScript, no TypeScript or frameworks.
+
 ```javascript
+// JavaScript ES6+
 // Base Agent Class
 class Agent {
   constructor(name, tools = []) {
@@ -1514,9 +1517,9 @@ graph TD
 
     APICall --> Never[NEVER log or expose]
 
-    style Encrypt fill:#4caf50
-    style Decrypt fill:#4caf50
-    style Never fill:#f44336
+    style Encrypt fill:#4caf50,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style Decrypt fill:#4caf50,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style Never fill:#f44336,stroke:#b71c1c,stroke-width:2px,color:#fff
 ```
 
 ### Security Measures
@@ -1628,10 +1631,11 @@ graph TB
     end
 
     subgraph "Manual Tests"
-        MT1[iPhone Chrome responsive]
-        MT2[Mac Safari compatibility]
-        MT3[AI fallback behavior]
-        MT4[User workflows]
+        MT1[iPhone Chrome - Primary]
+        MT2[Mac Chrome - Secondary]
+        MT3[iPhone Safari - Tertiary]
+        MT4[AI fallback behavior]
+        MT5[User workflows]
     end
 
     UT1 & UT2 & UT3 & UT4 & UT5 --> Coverage80[>80% Code Coverage]
@@ -1827,7 +1831,7 @@ graph LR
    - [ ] Unit tests
    - [ ] Agent behavior tests
    - [ ] Integration tests
-   - [ ] Manual testing on iPhone Chrome & Mac Safari
+   - [ ] Manual testing on iPhone Chrome (primary), Mac Chrome (secondary), iPhone Safari (tertiary)
 
 5. **📦 Deployment**
    - [ ] Create single HTML build
@@ -1844,7 +1848,7 @@ This architecture provides:
 ✅ **Clear separation of concerns** (UI, Business Logic, AI, Storage)
 ✅ **Modular agent framework** (easy to add/remove agents)
 ✅ **Graceful degradation** (works without AI)
-✅ **Mobile-first design** (iPhone Chrome, Mac Safari)
+✅ **Mobile-first design** (iPhone Chrome primary, Mac Chrome secondary, iPhone Safari tertiary)
 ✅ **Production considerations** (error handling, caching, cost tracking)
 ✅ **Testability** (unit tests, agent tests, integration tests)
 ✅ **Scalability** (can add backend later without major refactor)
