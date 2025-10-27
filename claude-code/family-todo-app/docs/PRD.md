@@ -26,7 +26,7 @@ Build a production-ready family task management application that demonstrates so
 - **Tertiary**: Social media audience (LinkedIn, YouTube) learning about practical AI implementation
 
 ### Success Criteria
-1. **Functional**: Family can effectively manage 100+ tasks across multiple categories
+1. **Functional**: Family can effectively manage 1000+ tasks across multiple categories
 2. **Technical**: Demonstrates understanding of agents, tools, LLM integration, prompt engineering
 3. **Portfolio**: Professional documentation suitable for investor/employer review
 4. **Content**: Provides material for 2-3 LinkedIn articles and 1-2 YouTube videos

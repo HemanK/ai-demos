@@ -414,6 +414,25 @@ Return ONLY valid JSON, no explanation.`;
   }
 }
 
+// Note: Default Due Date Behavior
+// If no due date is specified or inferred from the input, the system defaults to
+// Friday of the current week. This encourages task completion within the week
+// while providing a reasonable buffer.
+//
+// Implementation in DateExtractorTool:
+// function inferDueDate(extractedDate) {
+//   if (extractedDate) return extractedDate;
+//
+//   // Default to Friday of current week
+//   const today = new Date();
+//   const dayOfWeek = today.getDay(); // 0=Sunday, 5=Friday
+//   const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7; // If today is Friday, use next Friday
+//   const friday = new Date(today);
+//   friday.setDate(today.getDate() + daysUntilFriday);
+//
+//   return friday.toISOString().split('T')[0]; // YYYY-MM-DD
+// }
+
 // CategoryWizard SubAgent
 class CategoryWizardAgent extends Agent {
   constructor() {
@@ -951,6 +970,164 @@ const StorageSchema = {
 ---
 
 ## API Integration
+
+### Multi-LLM Provider Abstraction
+
+**Design Philosophy**: Support multiple LLM providers (Claude, OpenAI, local models) with a unified interface. This allows:
+- Cost optimization (choose cheaper models for simple tasks)
+- Performance tuning (faster models for real-time features)
+- Flexibility (switch providers without code changes)
+- Demonstration of advanced architecture for portfolio
+
+**Implementation Strategy**:
+- **MVP (V1.0)**: Claude only, but with abstraction layer ready
+- **V1.1**: Add OpenAI support
+- **Future**: Local LLM support (Ollama, etc.)
+
+```javascript
+// JavaScript ES6+
+// LLM Provider Interface
+class LLMProvider {
+  async complete(prompt, options) {
+    throw new Error('complete() must be implemented by provider');
+  }
+
+  async getConfig() {
+    return {
+      name: this.constructor.name,
+      models: [],
+      costPerToken: 0
+    };
+  }
+}
+
+// Claude Provider Implementation
+class ClaudeProvider extends LLMProvider {
+  constructor(apiKey) {
+    super();
+    this.apiKey = apiKey;
+    this.baseURL = 'https://api.anthropic.com/v1/messages';
+  }
+
+  async complete(prompt, options = {}) {
+    const {
+      model = 'claude-3-5-sonnet-20241022',
+      maxTokens = 1024,
+      temperature = 0.7
+    } = options;
+
+    // Implementation details in ClaudeAPIClient below
+    const client = new ClaudeAPIClient(this.apiKey);
+    return await client.call(prompt, { model, maxTokens, temperature });
+  }
+
+  async getConfig() {
+    return {
+      name: 'Claude',
+      models: ['claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307'],
+      costPerToken: { sonnet: 0.000015, haiku: 0.000001 }
+    };
+  }
+}
+
+// OpenAI Provider (Future - V1.1)
+class OpenAIProvider extends LLMProvider {
+  constructor(apiKey) {
+    super();
+    this.apiKey = apiKey;
+    this.baseURL = 'https://api.openai.com/v1/chat/completions';
+  }
+
+  async complete(prompt, options = {}) {
+    const {
+      model = 'gpt-4o-mini',
+      maxTokens = 1024,
+      temperature = 0.7
+    } = options;
+
+    // OpenAI API implementation
+    // To be implemented in V1.1
+    throw new Error('OpenAI provider not yet implemented');
+  }
+
+  async getConfig() {
+    return {
+      name: 'OpenAI',
+      models: ['gpt-4o', 'gpt-4o-mini'],
+      costPerToken: { 'gpt-4o': 0.00001, 'gpt-4o-mini': 0.000001 }
+    };
+  }
+}
+
+// Configuration: Which provider for which agent
+const AI_CONFIG = {
+  SmartParser: {
+    provider: 'claude',
+    model: 'claude-3-5-sonnet-20241022'
+  },
+  CategoryWizard: {
+    provider: 'claude',
+    model: 'claude-3-haiku-20240307' // Simpler task, cheaper model
+  },
+  RiskAdvisor: {
+    provider: 'claude',
+    model: 'claude-3-haiku-20240307'
+  },
+  TeamCoordinator: {
+    provider: 'claude',
+    model: 'claude-3-haiku-20240307'
+  }
+};
+
+// Provider Factory
+class LLMProviderFactory {
+  static providers = new Map();
+
+  static register(name, provider) {
+    this.providers.set(name.toLowerCase(), provider);
+  }
+
+  static getProvider(name) {
+    const provider = this.providers.get(name.toLowerCase());
+    if (!provider) {
+      throw new Error(`Provider ${name} not registered`);
+    }
+    return provider;
+  }
+}
+
+// Usage in Agent
+class Agent {
+  constructor(name, tools = []) {
+    this.name = name;
+    this.tools = tools;
+
+    // Get provider from config
+    const config = AI_CONFIG[name] || { provider: 'claude' };
+    const provider = LLMProviderFactory.getProvider(config.provider);
+    this.llmClient = provider;
+    this.modelConfig = config;
+  }
+
+  async callLLM(prompt) {
+    return await this.llmClient.complete(prompt, {
+      model: this.modelConfig.model,
+      maxTokens: 1024,
+      temperature: 0.7
+    });
+  }
+}
+```
+
+**Benefits**:
+1. **Extensibility**: New providers can be added without changing agents
+2. **Cost Optimization**: Use Haiku for simple tasks, Sonnet for complex
+3. **Testability**: Easy to mock providers for testing
+4. **Portfolio Value**: Shows advanced software engineering practices
+
+**Effort**: ~2-3 hours to implement abstraction layer (done upfront in MVP)
+
+---
 
 ### Claude API Architecture
 
