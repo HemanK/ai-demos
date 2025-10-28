@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GenAI-powered family task management with multi-agent architecture">
+    <title>Family ToDo - AI Task Manager</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- Favicon (optional) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✓</text></svg>">
+</head>
+<body>
+    <!-- Main App Container -->
+    <div id="app" class="app-container">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">📋 Family ToDo</h1>
+                <div class="user-selector">
+                    <label for="current-user">Current User:</label>
+                    <select id="current-user" class="user-select">
+                        <option value="all">All Family</option>
+                        <option value="member1">Sarah</option>
+                        <option value="member2">Mike</option>
+                        <option value="member3">Alex</option>
+                        <option value="member4">Emma</option>
+                        <option value="member5">James</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Pending:</span>
+                    <span class="stat-value" id="stat-pending">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Overdue:</span>
+                    <span class="stat-value stat-danger" id="stat-overdue">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Completed Today:</span>
+                    <span class="stat-value stat-success" id="stat-completed">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <div class="control-row">
+                    <!-- Add Task Button -->
+                    <button id="add-task-btn" class="btn btn-primary">
+                        <span class="btn-icon">➕</span>
+                        <span class="btn-text">Add Task</span>
+                    </button>
+
+                    <!-- AI Features -->
+                    <div class="ai-features">
+                        <button id="daily-briefing-btn" class="btn btn-secondary">
+                            <span class="btn-icon">🤖</span>
+                            <span class="btn-text">Daily Briefing</span>
+                        </button>
+                        <button id="risk-analysis-btn" class="btn btn-secondary">
+                            <span class="btn-icon">⚠️</span>
+                            <span class="btn-text">Risk Analysis</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters and Sorting -->
+                <div class="filter-sort-row">
+                    <!-- Category Filter -->
+                    <select id="filter-category" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="Shopping">🛒 Shopping</option>
+                        <option value="Household">🏠 Household</option>
+                        <option value="Bills">💰 Bills</option>
+                        <option value="Insurance">🛡️ Insurance</option>
+                        <option value="Investments">📈 Investments</option>
+                        <option value="Work">💼 Work</option>
+                        <option value="Other">📌 Other</option>
+                    </select>
+
+                    <!-- Priority Filter -->
+                    <select id="filter-priority" class="filter-select">
+                        <option value="all">All Priorities</option>
+                        <option value="High">🔴 High</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="Low">🟢 Low</option>
+                    </select>
+
+                    <!-- Status Filter -->
+                    <select id="filter-status" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="pending">⏳ Pending</option>
+                        <option value="in-progress">⚙️ In Progress</option>
+                        <option value="completed">✅ Completed</option>
+                    </select>
+
+                    <!-- Sort By -->
+                    <select id="sort-by" class="filter-select">
+                        <option value="dueDate">Sort: Due Date</option>
+                        <option value="priority">Sort: Priority</option>
+                        <option value="created">Sort: Created</option>
+                        <option value="member">Sort: Member</option>
+                    </select>
+                </div>
+
+                <!-- Export/Import -->
+                <div class="data-management">
+                    <button id="export-btn" class="btn btn-small">📤 Export</button>
+                    <button id="import-btn" class="btn btn-small">📥 Import</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+            </section>
+
+            <!-- Task List -->
+            <section class="task-list-section">
+                <h2 class="section-title">Tasks</h2>
+                <div id="task-list" class="task-list">
+                    <!-- Tasks will be rendered here dynamically -->
+                    <div class="empty-state">
+                        <p>📝 No tasks yet. Add one to get started!</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>
+                Powered by <strong>GenAI Multi-Agent Architecture</strong>
+                <span class="footer-separator">|</span>
+                <a href="https://github.com/HemanK/ai-demos" target="_blank" rel="noopener">View on GitHub</a>
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- Modal: Add/Edit Task -->
+    <div id="task-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Task</h2>
+                <button id="modal-close" class="modal-close" aria-label="Close modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Natural Language Input -->
+                <div class="form-section nl-input-section">
+                    <label for="nl-input" class="form-label">
+                        🤖 Quick Entry (Natural Language)
+                    </label>
+                    <textarea
+                        id="nl-input"
+                        class="form-input form-textarea"
+                        placeholder="e.g., 'Buy milk tomorrow morning' or 'Pay electric bill by Friday high priority'"
+                        rows="2"
+                    ></textarea>
+                    <button id="parse-nl-btn" class="btn btn-secondary btn-small">
+                        <span class="btn-icon">✨</span>
+                        <span class="btn-text">Parse with AI</span>
+                    </button>
+                    <div id="ai-parse-status" class="status-message"></div>
+                </div>
+
+                <div class="form-divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Manual Entry Form -->
+                <form id="task-form" class="task-form">
+                    <div class="form-group">
+                        <label for="task-title" class="form-label">Title *</label>
+                        <input
+                            type="text"
+                            id="task-title"
+                            class="form-input"
+                            placeholder="Task title"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task-description" class="form-label">Description</label>
+                        <textarea
+                            id="task-description"
+                            class="form-input form-textarea"
+                            placeholder="Additional details (optional)"
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-category" class="form-label">Category *</label>
+                            <select id="task-category" class="form-input" required>
+                                <option value="">Select category</option>
+                                <option value="Shopping">🛒 Shopping</option>
+                                <option value="Household">🏠 Household</option>
+                                <option value="Bills">💰 Bills</option>
+                                <option value="Insurance">🛡️ Insurance</option>
+                                <option value="Investments">📈 Investments</option>
+                                <option value="Work">💼 Work</option>
+                                <option value="Other">📌 Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-assigned" class="form-label">Assigned To *</label>
+                            <select id="task-assigned" class="form-input" required>
+                                <option value="">Select member</option>
+                                <option value="member1">Sarah</option>
+                                <option value="member2">Mike</option>
+                                <option value="member3">Alex</option>
+                                <option value="member4">Emma</option>
+                                <option value="member5">James</option>
+                                <option value="all">All Family</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-due-date" class="form-label">Due Date *</label>
+                            <input
+                                type="date"
+                                id="task-due-date"
+                                class="form-input"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-time" class="form-label">Time of Day</label>
+                            <select id="task-time" class="form-input">
+                                <option value="">Any time</option>
+                                <option value="Morning">☀️ Morning</option>
+                                <option value="Afternoon">🌤️ Afternoon</option>
+                                <option value="Evening">🌆 Evening</option>
+                                <option value="Night">🌙 Night</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-priority" class="form-label">Priority *</label>
+                            <select id="task-priority" class="form-input" required>
+                                <option value="Medium">🟡 Medium</option>
+                                <option value="High">🔴 High</option>
+                                <option value="Low">🟢 Low</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-urgency" class="form-label">Urgency *</label>
+                            <select id="task-urgency" class="form-input" required>
+                                <option value="Medium">🟡 Medium</option>
+                                <option value="High">🔴 High</option>
+                                <option value="Low">🟢 Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task-notes" class="form-label">Notes</label>
+                        <textarea
+                            id="task-notes"
+                            class="form-input form-textarea"
+                            placeholder="Additional notes or reminders"
+                            rows="2"
+                        ></textarea>
+                    </div>
+
+                    <input type="hidden" id="task-id" value="">
+                    <input type="hidden" id="task-status" value="pending">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="save-task-btn" class="btn btn-primary">
+                    Save Task
+                </button>
+                <button type="button" id="cancel-task-btn" class="btn btn-secondary">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Processing with AI...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JavaScript Files -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/taskManager.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- AI Integration (loaded conditionally if API key is set) -->
+    <script src="js/ai/claudeClient.js"></script>
+    <script src="js/ai/prompts.js"></script>
+
+    <!-- Agent Framework -->
+    <script src="js/agents/baseAgent.js"></script>
+    <script src="js/agents/taskMasterAgent.js"></script>
+    <script src="js/agents/smartParser.js"></script>
+
+    <!-- Tools -->
+    <script src="js/tools/dateExtractor.js"></script>
+    <script src="js/tools/priorityDetector.js"></script>
+</body>
+</html>
