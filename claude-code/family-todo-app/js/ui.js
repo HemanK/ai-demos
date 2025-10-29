@@ -13,6 +13,10 @@ const UI = {
   },
   currentSort: 'dueDate',
 
+  // Pagination
+  currentPage: 1,
+  tasksPerPage: 20,
+
   /**
    * Initialize UI
    */
@@ -23,20 +27,20 @@ const UI = {
   },
 
   /**
-   * Render all tasks in the task list
+   * Render all tasks in the task list with pagination
    */
   renderTaskList() {
     const taskListEl = document.getElementById('task-list');
     if (!taskListEl) return;
 
     // Get filtered and sorted tasks
-    const tasks = TaskManager.getFilteredTasks(this.currentFilters, this.currentSort);
+    const allTasks = TaskManager.getFilteredTasks(this.currentFilters, this.currentSort);
 
     // Clear existing content
     taskListEl.innerHTML = '';
 
     // Show empty state if no tasks
-    if (tasks.length === 0) {
+    if (allTasks.length === 0) {
       const message = this.isFiltered()
         ? 'No tasks match the current filters.'
         : 'No tasks yet. Add one to get started!';
@@ -46,14 +50,35 @@ const UI = {
           <p>📝 ${message}</p>
         </div>
       `;
+      this.renderPaginationControls(0, 0);
       return;
     }
 
+    // Calculate pagination
+    const totalTasks = allTasks.length;
+    const totalPages = Math.ceil(totalTasks / this.tasksPerPage);
+
+    // Ensure current page is valid
+    if (this.currentPage > totalPages) {
+      this.currentPage = totalPages;
+    }
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
+
+    // Get tasks for current page
+    const startIdx = (this.currentPage - 1) * this.tasksPerPage;
+    const endIdx = startIdx + this.tasksPerPage;
+    const tasksToShow = allTasks.slice(startIdx, endIdx);
+
     // Render each task
-    tasks.forEach(task => {
+    tasksToShow.forEach(task => {
       const taskCard = this.createTaskCard(task);
       taskListEl.appendChild(taskCard);
     });
+
+    // Render pagination controls
+    this.renderPaginationControls(totalTasks, totalPages);
   },
 
   /**
@@ -135,6 +160,129 @@ const UI = {
   },
 
   /**
+   * Render pagination controls
+   * @param {number} totalTasks - Total number of tasks
+   * @param {number} totalPages - Total number of pages
+   */
+  renderPaginationControls(totalTasks, totalPages) {
+    const paginationEl = document.getElementById('pagination-controls');
+    if (!paginationEl) return;
+
+    // Hide if no tasks or only one page
+    if (totalPages <= 1) {
+      paginationEl.innerHTML = '';
+      paginationEl.style.display = 'none';
+      return;
+    }
+
+    paginationEl.style.display = 'flex';
+
+    // Calculate range
+    const startIdx = (this.currentPage - 1) * this.tasksPerPage + 1;
+    const endIdx = Math.min(this.currentPage * this.tasksPerPage, totalTasks);
+
+    let html = `
+      <div class="pagination-info">
+        Showing ${startIdx}-${endIdx} of ${totalTasks} tasks
+      </div>
+      <div class="pagination-buttons">
+    `;
+
+    // Previous button
+    if (this.currentPage > 1) {
+      html += `<button class="btn btn-small" onclick="UI.prevPage()">← Previous</button>`;
+    } else {
+      html += `<button class="btn btn-small" disabled>← Previous</button>`;
+    }
+
+    // Page numbers (show max 5 pages at a time)
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    // Adjust if at the end
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    // First page + ellipsis if needed
+    if (startPage > 1) {
+      html += `<button class="btn btn-small" onclick="UI.goToPage(1)">1</button>`;
+      if (startPage > 2) {
+        html += `<span class="pagination-ellipsis">...</span>`;
+      }
+    }
+
+    // Page number buttons
+    for (let i = startPage; i <= endPage; i++) {
+      if (i === this.currentPage) {
+        html += `<button class="btn btn-small btn-primary">${i}</button>`;
+      } else {
+        html += `<button class="btn btn-small" onclick="UI.goToPage(${i})">${i}</button>`;
+      }
+    }
+
+    // Last page + ellipsis if needed
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        html += `<span class="pagination-ellipsis">...</span>`;
+      }
+      html += `<button class="btn btn-small" onclick="UI.goToPage(${totalPages})">${totalPages}</button>`;
+    }
+
+    // Next button
+    if (this.currentPage < totalPages) {
+      html += `<button class="btn btn-small" onclick="UI.nextPage()">Next →</button>`;
+    } else {
+      html += `<button class="btn btn-small" disabled>Next →</button>`;
+    }
+
+    html += `
+      </div>
+    `;
+
+    paginationEl.innerHTML = html;
+  },
+
+  /**
+   * Navigate to a specific page
+   * @param {number} pageNum - Page number
+   */
+  goToPage(pageNum) {
+    this.currentPage = pageNum;
+    this.renderTaskList();
+    // Scroll to top of task list
+    const taskSection = document.querySelector('.task-list-section');
+    if (taskSection) {
+      taskSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  /**
+   * Navigate to next page
+   */
+  nextPage() {
+    this.currentPage++;
+    this.renderTaskList();
+    const taskSection = document.querySelector('.task-list-section');
+    if (taskSection) {
+      taskSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  /**
+   * Navigate to previous page
+   */
+  prevPage() {
+    this.currentPage--;
+    this.renderTaskList();
+    const taskSection = document.querySelector('.task-list-section');
+    if (taskSection) {
+      taskSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  /**
    * Update statistics in header
    */
   updateStats() {
@@ -156,6 +304,7 @@ const UI = {
    */
   updateFilter(filterType, value) {
     this.currentFilters[filterType] = value;
+    this.currentPage = 1; // Reset to first page when filtering
     this.renderTaskList();
   },
 
@@ -165,6 +314,7 @@ const UI = {
    */
   updateSort(sortBy) {
     this.currentSort = sortBy;
+    this.currentPage = 1; // Reset to first page when sorting
     this.renderTaskList();
   },
 
