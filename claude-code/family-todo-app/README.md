@@ -2,21 +2,50 @@
 
 A sophisticated task management application featuring multi-agent AI architecture, natural language processing, and intelligent task analysis.
 
+## 🎉 What's New in v1.1.0
+
+**Released:** October 29, 2025
+
+- ✨ **Configurable Names**: Member names now M1-M5 (easily customizable)
+- 📂 **14 Categories**: Expanded from 7 to 14 categories including Doctors, Meds, Travel, Auto Insurance, and more
+- 🏷️ **Subcategories**: Add custom subcategories to any task
+- 💾 **Smart Export**: Export filtered tasks or all tasks with custom filename
+- 🤖 **Enhanced AI Parsing**: Better date recognition (10/31, Monday), priority vs urgency detection, smart title/description splitting
+- 📱 **Device Tracking**: Automatic device/browser detection for troubleshooting
+- 📄 **Pagination**: Clean navigation for 20+ tasks with page controls
+- 🔄 **Automatic Migration**: Seamless upgrade from v1.0 with zero data loss
+
+See [CHANGELOG.md](CHANGELOG.md) for complete details.
+
 ## ✨ Features
 
 ### Core Features
-- ✅ **Task Management**: Create, edit, delete, and manage tasks
+- ✅ **Task Management**: Create, edit, delete, and manage tasks with rich details
+- 📂 **14 Categories**: Shopping, Household, Bills, Doctors, Meds, Travel, Auto/Health Insurance, Investments, Work, Projects, Jobs, Home 2, Other
+- 🏷️ **Subcategories**: Add custom subcategories to organize tasks further
 - 📊 **Smart Filtering**: Filter by category, priority, status, and family member
 - 🔄 **Flexible Sorting**: Sort by due date, priority, creation date, or member
-- 💾 **Export/Import**: Backup and restore tasks via JSON
-- 📱 **Mobile-First**: Responsive design optimized for iPhone Chrome, Mac Chrome, and iPhone Safari
+- 📄 **Pagination**: Clean navigation for large task lists (20 tasks per page)
+- 💾 **Smart Export/Import**: Export filtered or all tasks with custom filenames
+- 📱 **Mobile-First**: Responsive design optimized for iPhone Chrome (primary), Mac Chrome (secondary), iPhone Safari (tertiary)
 - ♿ **Accessible**: WCAG 2.1 Level AA compliant
+- 🔄 **Data Migration**: Automatic version upgrades with zero data loss
 
-### AI-Powered Features (Coming Soon)
-- 🤖 **Natural Language Entry**: "Buy milk tomorrow morning" → Auto-populated task
+### AI-Powered Features
+- 🤖 **Natural Language Entry**: "Buy milk tomorrow morning" or "Pay bills 10/31 high priority" → Auto-populated task
+- 📅 **Smart Date Parsing**: Recognizes numeric dates (10/31), day names (Monday), relative dates (tomorrow)
+- 🎯 **Priority Detection**: Separate priority and urgency with smart keyword recognition
+- ✂️ **Smart Text Splitting**: Automatically splits input into title, description, and notes
+- 📱 **Device Tracking**: Tracks which device created each task
+
+### Coming Soon
 - 📅 **Daily Briefing**: AI-generated summary of today's and tomorrow's tasks
 - ⚠️ **Risk Analysis**: Identifies tasks at risk of missing deadlines
-- 🎯 **Smart Suggestions**: AI-powered category and priority recommendations
+- 🔍 **Search**: Global search across all task fields
+- 👥 **Multi-Member Tagging**: Assign tasks to multiple people
+- 🎙️ **Voice Input**: Create tasks using voice commands
+
+See [ROADMAP.md](ROADMAP.md) for the complete feature roadmap.
 
 ## 🚀 Quick Start
 
