@@ -222,29 +222,64 @@ const App = {
     const statusEl = document.getElementById('ai-parse-status');
 
     try {
-      // Extract title (first part before keywords)
-      let title = text.split(/\b(tomorrow|today|next week|friday|monday|high|low|priority)/i)[0].trim();
+      const originalText = text;
 
-      // Extract due date
+      // Extract and parse date (numeric format like 10/31, 12/25)
       let dueDate = Utils.getDefaultDueDate();
+      const numericDateMatch = text.match(/\b(\d{1,2})\/(\d{1,2})\b/);
+      if (numericDateMatch) {
+        const month = parseInt(numericDateMatch[1]);
+        const day = parseInt(numericDateMatch[2]);
+        const year = new Date().getFullYear();
+        const parsedDate = new Date(year, month - 1, day);
+        if (!isNaN(parsedDate.getTime())) {
+          dueDate = Utils.formatDate(parsedDate);
+        }
+      }
+
+      // Day names (Monday, Tuesday, etc.)
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      for (let i = 0; i < dayNames.length; i++) {
+        const regex = new RegExp(`\\b${dayNames[i]}\\b`, 'i');
+        if (regex.test(text)) {
+          const today = new Date();
+          const currentDay = today.getDay();
+          let daysUntil = (i - currentDay + 7) % 7;
+          if (daysUntil === 0) daysUntil = 7; // Next week if today
+          const targetDate = new Date(today);
+          targetDate.setDate(today.getDate() + daysUntil);
+          dueDate = Utils.formatDate(targetDate);
+          break;
+        }
+      }
+
+      // Relative dates
       if (/\btoday\b/i.test(text)) {
         dueDate = Utils.formatDate(new Date());
       } else if (/\btomorrow\b/i.test(text)) {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         dueDate = Utils.formatDate(tomorrow);
-      } else if (/\bnext friday\b/i.test(text)) {
-        const nextFriday = new Date();
-        nextFriday.setDate(nextFriday.getDate() + ((5 + 7 - nextFriday.getDay()) % 7) + 7);
-        dueDate = Utils.formatDate(nextFriday);
       }
 
-      // Extract priority
+      // Extract priority (separate from urgency)
       let priority = 'Medium';
-      if (/\bhigh\s*priority\b/i.test(text) || /\burgent\b/i.test(text)) {
+      let urgency = 'Medium';
+
+      // Priority keywords
+      if (/\bhigh\s*priority\b/i.test(text)) {
         priority = 'High';
       } else if (/\blow\s*priority\b/i.test(text)) {
         priority = 'Low';
+      } else if (/\bmedium\s*priority\b/i.test(text)) {
+        priority = 'Medium';
+      }
+
+      // Urgency keywords (separate from priority)
+      if (/\burgent\b/i.test(text)) {
+        urgency = 'High';
+      } else if (/\bnot\s+urgent\b/i.test(text)) {
+        urgency = 'Low';
       }
 
       // Extract time of day
@@ -265,21 +300,67 @@ const App = {
         category = 'Shopping';
       } else if (/\b(pay|bill|payment|invoice)\b/i.test(text)) {
         category = 'Bills';
+      } else if (/\b(doctor|appointment|checkup|medical)\b/i.test(text)) {
+        category = 'Doctors';
+      } else if (/\b(medicine|medication|pills|prescription|pharmacy)\b/i.test(text)) {
+        category = 'Meds';
+      } else if (/\b(travel|flight|trip|vacation|hotel)\b/i.test(text)) {
+        category = 'Travel';
       } else if (/\b(clean|fix|repair|home|house)\b/i.test(text)) {
         category = 'Household';
-      } else if (/\b(insurance|policy|claim)\b/i.test(text)) {
-        category = 'Insurance';
+      } else if (/\b(auto|car|vehicle)\s*(insurance|policy)\b/i.test(text)) {
+        category = 'Auto_Insurance';
+      } else if (/\b(health|medical)\s*(insurance|policy)\b/i.test(text)) {
+        category = 'Health_Insurance';
       } else if (/\b(invest|stock|portfolio)\b/i.test(text)) {
         category = 'Investments';
-      } else if (/\b(work|meeting|project|deadline)\b/i.test(text)) {
+      } else if (/\b(work|meeting|project|deadline|job)\b/i.test(text)) {
         category = 'Work';
       }
 
+      // Smart title/description/notes extraction
+      let title = '';
+      let description = '';
+      let notes = '';
+
+      // Remove date/time/priority keywords to get core task
+      let cleanedText = text
+        .replace(/\b\d{1,2}\/\d{1,2}\b/g, '')
+        .replace(/\b(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi, '')
+        .replace(/\b(morning|afternoon|evening|night)\b/gi, '')
+        .replace(/\b(high|medium|low)\s*(priority|urgency)\b/gi, '')
+        .replace(/\b(urgent|not urgent)\b/gi, '')
+        .trim();
+
+      // Split by punctuation or length
+      const sentences = cleanedText.split(/[.!;]/).filter(s => s.trim());
+
+      if (sentences.length === 1) {
+        // Short input: everything is title
+        title = sentences[0].trim().substring(0, 60); // Limit title length
+      } else if (sentences.length === 2) {
+        // Two parts: first is title, second is description
+        title = sentences[0].trim().substring(0, 60);
+        description = sentences[1].trim();
+      } else if (sentences.length >= 3) {
+        // Multiple parts: first is title, next 1-2 are description, rest are notes
+        title = sentences[0].trim().substring(0, 60);
+        description = sentences.slice(1, 3).join('. ').trim();
+        notes = sentences.slice(3).join('. ').trim();
+      }
+
+      // Fallback if no good title extracted
+      if (!title) {
+        title = originalText.substring(0, 60);
+      }
+
       // Populate form
-      document.getElementById('task-title').value = title || text;
+      document.getElementById('task-title').value = title;
+      if (description) document.getElementById('task-description').value = description;
+      if (notes) document.getElementById('task-notes').value = notes;
       document.getElementById('task-due-date').value = dueDate;
       document.getElementById('task-priority').value = priority;
-      document.getElementById('task-urgency').value = priority;
+      document.getElementById('task-urgency').value = urgency;
       if (timeOfDay) {
         document.getElementById('task-time').value = timeOfDay;
       }
@@ -288,7 +369,7 @@ const App = {
       // Show success message
       if (statusEl) {
         statusEl.className = 'status-message status-success';
-        statusEl.textContent = '✓ Parsed successfully! Review and adjust the fields below.';
+        statusEl.textContent = '✓ Parsed successfully! Title, description, and dates extracted. Review below.';
       }
 
       // Scroll to form
