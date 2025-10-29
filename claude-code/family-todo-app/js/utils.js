@@ -13,6 +13,44 @@ const Utils = {
   },
 
   /**
+   * Detect device and browser
+   * @returns {string} Device info (e.g., "iPhone Chrome", "Mac Safari")
+   */
+  getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let device = 'Unknown';
+    let browser = 'Unknown';
+
+    // Detect device
+    if (/iPhone/i.test(ua)) {
+      device = 'iPhone';
+    } else if (/iPad/i.test(ua)) {
+      device = 'iPad';
+    } else if (/Android/i.test(ua)) {
+      device = 'Android';
+    } else if (/Macintosh|Mac OS X/i.test(ua)) {
+      device = 'Mac';
+    } else if (/Windows/i.test(ua)) {
+      device = 'Windows';
+    } else if (/Linux/i.test(ua)) {
+      device = 'Linux';
+    }
+
+    // Detect browser
+    if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
+      browser = 'Chrome';
+    } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+      browser = 'Safari';
+    } else if (/Firefox/i.test(ua)) {
+      browser = 'Firefox';
+    } else if (/Edg/i.test(ua)) {
+      browser = 'Edge';
+    }
+
+    return `${device} ${browser}`;
+  },
+
+  /**
    * Format date to YYYY-MM-DD
    * @param {Date} date - Date object
    * @returns {string} Formatted date string

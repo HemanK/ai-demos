@@ -63,6 +63,7 @@ const TaskManager = {
         title: taskData.title.trim(),
         description: taskData.description?.trim() || '',
         category: taskData.category,
+        subcategory: taskData.subcategory?.trim() || '',
         assignedTo: taskData.assignedTo,
         dueDate: taskData.dueDate,
         timeOfDay: taskData.timeOfDay || '',
@@ -71,6 +72,7 @@ const TaskManager = {
         status: taskData.status || 'pending',
         notes: taskData.notes?.trim() || '',
         createdAt: new Date().toISOString(),
+        createdFrom: Utils.getDeviceInfo(), // Track which device created this task
         updatedAt: new Date().toISOString(),
         completedAt: null
       };

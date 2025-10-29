@@ -369,14 +369,58 @@ const UI = {
 
   /**
    * Handle export tasks
+   * Exports currently filtered/visible tasks with custom filename option
    */
   handleExport() {
     try {
-      const jsonData = TaskManager.exportTasks();
+      // Get currently filtered tasks (what user sees on screen)
+      const filteredTasks = TaskManager.getFilteredTasks(this.currentFilters, this.currentSort);
+
+      // Check if user wants to export all or just filtered
+      let tasksToExport;
+      let filenamePrefix;
+
+      if (this.isFiltered() && filteredTasks.length < TaskManager.tasks.length) {
+        // Ask user: export all or just filtered?
+        const exportFiltered = confirm(
+          `Export only the ${filteredTasks.length} filtered tasks you see on screen?\n\n` +
+          `Click OK to export filtered tasks (${filteredTasks.length}).\n` +
+          `Click Cancel to export ALL tasks (${TaskManager.tasks.length}).`
+        );
+
+        if (exportFiltered) {
+          tasksToExport = filteredTasks;
+          filenamePrefix = 'filtered-tasks';
+        } else {
+          tasksToExport = TaskManager.getAllTasks();
+          filenamePrefix = CONFIG.EXPORT.FILENAME_PREFIX;
+        }
+      } else {
+        // No filters active, export all
+        tasksToExport = TaskManager.getAllTasks();
+        filenamePrefix = CONFIG.EXPORT.FILENAME_PREFIX;
+      }
+
+      // Generate JSON
+      const jsonData = Storage.exportToJSON(tasksToExport);
       const blob = new Blob([jsonData], { type: CONFIG.EXPORT.MIME_TYPE });
       const url = URL.createObjectURL(blob);
 
-      const filename = `${CONFIG.EXPORT.FILENAME_PREFIX}-${Utils.formatDate(new Date())}.json`;
+      // Prompt for custom filename
+      const defaultFilename = `${filenamePrefix}-${Utils.formatDate(new Date())}.json`;
+      const customFilename = prompt(
+        `Enter filename for export (${tasksToExport.length} tasks):`,
+        defaultFilename
+      );
+
+      if (!customFilename) {
+        // User cancelled
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Ensure .json extension
+      const filename = customFilename.endsWith('.json') ? customFilename : `${customFilename}.json`;
 
       const a = document.createElement('a');
       a.href = url;
@@ -387,7 +431,7 @@ const UI = {
       URL.revokeObjectURL(url);
 
       Storage.markBackupCompleted();
-      Utils.showToast(`Exported ${TaskManager.tasks.length} tasks`, 'success');
+      Utils.showToast(`Exported ${tasksToExport.length} tasks to ${filename}`, 'success', 4000);
     } catch (e) {
       console.error('Export error:', e);
       Utils.showToast('Error exporting tasks', 'error');
