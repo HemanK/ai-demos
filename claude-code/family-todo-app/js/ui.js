@@ -97,7 +97,7 @@ const UI = {
       </div>
 
       <div class="task-meta">
-        <span>${categoryInfo.emoji} ${categoryInfo.name}</span>
+        <span>${categoryInfo.emoji} ${categoryInfo.name}${task.subcategory ? ` / ${Utils.escapeHtml(task.subcategory)}` : ''}</span>
         <span>${priorityInfo.emoji} ${priorityInfo.label}</span>
         <span>👤 ${Utils.getMemberName(task.assignedTo)}</span>
         <span class="${overdueClass}">
@@ -228,6 +228,8 @@ const UI = {
     document.getElementById('task-title').value = task.title;
     document.getElementById('task-description').value = task.description || '';
     document.getElementById('task-category').value = task.category;
+    const subcategoryEl = document.getElementById('task-subcategory');
+    if (subcategoryEl) subcategoryEl.value = task.subcategory || '';
     document.getElementById('task-assigned').value = task.assignedTo;
     document.getElementById('task-due-date').value = task.dueDate;
     document.getElementById('task-time').value = task.timeOfDay || '';
@@ -279,6 +281,7 @@ const UI = {
       title: document.getElementById('task-title').value,
       description: document.getElementById('task-description').value,
       category: document.getElementById('task-category').value,
+      subcategory: document.getElementById('task-subcategory')?.value || '',
       assignedTo: document.getElementById('task-assigned').value,
       dueDate: document.getElementById('task-due-date').value,
       timeOfDay: document.getElementById('task-time').value,

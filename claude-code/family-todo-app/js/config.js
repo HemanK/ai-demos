@@ -10,26 +10,42 @@ const CONFIG = {
 
   // Storage
   STORAGE_KEY: 'familyTodoTasks',
-  STORAGE_VERSION: '1.0',
+  STORAGE_VERSION: '1.1', // Bumped for data migration
 
-  // Family Members
+  // Family Members - CONFIGURABLE: Edit these to customize for your family/team
   FAMILY_MEMBERS: [
-    { id: 'member1', name: 'Sarah', color: '#E3F2FD' },
-    { id: 'member2', name: 'Mike', color: '#E8F5E9' },
-    { id: 'member3', name: 'Alex', color: '#FFF9C4' },
-    { id: 'member4', name: 'Emma', color: '#FCE4EC' },
-    { id: 'member5', name: 'James', color: '#E0F2F1' },
+    { id: 'member1', name: 'M1', color: '#E3F2FD' },
+    { id: 'member2', name: 'M2', color: '#E8F5E9' },
+    { id: 'member3', name: 'M3', color: '#FFF9C4' },
+    { id: 'member4', name: 'M4', color: '#FCE4EC' },
+    { id: 'member5', name: 'M5', color: '#E0F2F1' },
     { id: 'all', name: 'All Family', color: '#F5F5F5' }
   ],
 
-  // Task Categories
+  // Legacy member name mapping (for data migration from v1.0 to v1.1)
+  LEGACY_MEMBER_MAPPING: {
+    'Sarah': 'member1',  // M1
+    'Mike': 'member2',   // M2
+    'Alex': 'member3',   // M3
+    'Emma': 'member4',   // M4
+    'James': 'member5'   // M5
+  },
+
+  // Task Categories - CONFIGURABLE: Add/remove categories as needed
   CATEGORIES: [
     { id: 'Shopping', name: 'Shopping', emoji: '🛒', color: '#4CAF50' },
     { id: 'Household', name: 'Household', emoji: '🏠', color: '#2196F3' },
     { id: 'Bills', name: 'Bills', emoji: '💰', color: '#F44336' },
-    { id: 'Insurance', name: 'Insurance', emoji: '🛡️', color: '#9C27B0' },
+    { id: 'Auto_Insurance', name: 'Auto Insurance', emoji: '🚗', color: '#FF5722' },
+    { id: 'Health_Insurance', name: 'Health Insurance', emoji: '🏥', color: '#E91E63' },
     { id: 'Investments', name: 'Investments', emoji: '📈', color: '#FF9800' },
     { id: 'Work', name: 'Work', emoji: '💼', color: '#607D8B' },
+    { id: 'Doctors', name: 'Doctors', emoji: '👨‍⚕️', color: '#00BCD4' },
+    { id: 'Meds', name: 'Meds', emoji: '💊', color: '#9C27B0' },
+    { id: 'Travel', name: 'Travel', emoji: '✈️', color: '#3F51B5' },
+    { id: 'Project', name: 'Project', emoji: '📋', color: '#009688' },
+    { id: 'Jobs', name: 'Jobs', emoji: '💼', color: '#795548' },
+    { id: 'Home_2', name: 'Home 2', emoji: '🏡', color: '#8BC34A' },
     { id: 'Other', name: 'Other', emoji: '📌', color: '#757575' }
   ],
 

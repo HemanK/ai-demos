@@ -24,11 +24,11 @@
                     <label for="current-user">Current User:</label>
                     <select id="current-user" class="user-select">
                         <option value="all">All Family</option>
-                        <option value="member1">Sarah</option>
-                        <option value="member2">Mike</option>
-                        <option value="member3">Alex</option>
-                        <option value="member4">Emma</option>
-                        <option value="member5">James</option>
+                        <option value="member1">M1</option>
+                        <option value="member2">M2</option>
+                        <option value="member3">M3</option>
+                        <option value="member4">M4</option>
+                        <option value="member5">M5</option>
                     </select>
                 </div>
             </div>
@@ -83,9 +83,16 @@
                         <option value="Shopping">🛒 Shopping</option>
                         <option value="Household">🏠 Household</option>
                         <option value="Bills">💰 Bills</option>
-                        <option value="Insurance">🛡️ Insurance</option>
+                        <option value="Auto_Insurance">🚗 Auto Insurance</option>
+                        <option value="Health_Insurance">🏥 Health Insurance</option>
                         <option value="Investments">📈 Investments</option>
                         <option value="Work">💼 Work</option>
+                        <option value="Doctors">👨‍⚕️ Doctors</option>
+                        <option value="Meds">💊 Meds</option>
+                        <option value="Travel">✈️ Travel</option>
+                        <option value="Project">📋 Project</option>
+                        <option value="Jobs">💼 Jobs</option>
+                        <option value="Home_2">🏡 Home 2</option>
                         <option value="Other">📌 Other</option>
                     </select>
 
@@ -209,22 +216,41 @@
                                 <option value="Shopping">🛒 Shopping</option>
                                 <option value="Household">🏠 Household</option>
                                 <option value="Bills">💰 Bills</option>
-                                <option value="Insurance">🛡️ Insurance</option>
+                                <option value="Auto_Insurance">🚗 Auto Insurance</option>
+                                <option value="Health_Insurance">🏥 Health Insurance</option>
                                 <option value="Investments">📈 Investments</option>
                                 <option value="Work">💼 Work</option>
+                                <option value="Doctors">👨‍⚕️ Doctors</option>
+                                <option value="Meds">💊 Meds</option>
+                                <option value="Travel">✈️ Travel</option>
+                                <option value="Project">📋 Project</option>
+                                <option value="Jobs">💼 Jobs</option>
+                                <option value="Home_2">🏡 Home 2</option>
                                 <option value="Other">📌 Other</option>
                             </select>
                         </div>
 
                         <div class="form-group">
+                            <label for="task-subcategory" class="form-label">Subcategory</label>
+                            <input
+                                type="text"
+                                id="task-subcategory"
+                                class="form-input"
+                                placeholder="Optional subcategory"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="task-assigned" class="form-label">Assigned To *</label>
                             <select id="task-assigned" class="form-input" required>
                                 <option value="">Select member</option>
-                                <option value="member1">Sarah</option>
-                                <option value="member2">Mike</option>
-                                <option value="member3">Alex</option>
-                                <option value="member4">Emma</option>
-                                <option value="member5">James</option>
+                                <option value="member1">M1</option>
+                                <option value="member2">M2</option>
+                                <option value="member3">M3</option>
+                                <option value="member4">M4</option>
+                                <option value="member5">M5</option>
                                 <option value="all">All Family</option>
                             </select>
                         </div>

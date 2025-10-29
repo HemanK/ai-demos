@@ -156,9 +156,31 @@ const Storage = {
   migrateData(oldData) {
     console.log('Migrating data from version', oldData.version, 'to', CONFIG.STORAGE_VERSION);
 
-    // For now, just return tasks array if it exists
-    // In the future, add version-specific migration logic here
-    return oldData.tasks || [];
+    let tasks = oldData.tasks || [];
+
+    // Migration from v1.0 to v1.1: Update legacy member names
+    if (oldData.version === '1.0' || !oldData.version) {
+      console.log('Applying v1.0 -> v1.1 migration: Updating member names');
+
+      tasks = tasks.map(task => {
+        // Check if assignedTo is a legacy name (old name format)
+        if (task.assignedTo && CONFIG.LEGACY_MEMBER_MAPPING[task.assignedTo]) {
+          const newId = CONFIG.LEGACY_MEMBER_MAPPING[task.assignedTo];
+          console.log(`Migrating task "${task.title}": ${task.assignedTo} -> ${newId}`);
+          return {
+            ...task,
+            assignedTo: newId,
+            // Add migration timestamp
+            migratedAt: new Date().toISOString()
+          };
+        }
+        return task;
+      });
+
+      console.log(`Migration complete: Updated ${tasks.length} tasks`);
+    }
+
+    return tasks;
   },
 
   /**
