@@ -610,22 +610,24 @@ body {
 
 .stat-card {
     padding: var(--spacing-md);
-    background-color: var(--bg-secondary);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     border-radius: var(--radius-md);
     text-align: center;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
 }
 
 .stat-value {
     font-size: var(--font-size-xl);
     font-weight: bold;
-    color: var(--primary-color);
+    color: #FFFFFF;
     display: block;
     margin-bottom: var(--spacing-xs);
 }
 
 .stat-label {
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: #FFFFFF;
+    opacity: 0.95;
 }
 
 .member-group {
@@ -710,6 +712,55 @@ body {
     border-left-color: var(--success-color);
 }
 
+/* ==================== Import Confirmation Modal ==================== */
+.import-metadata {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.import-metadata-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.import-metadata-row:last-child {
+    border-bottom: none;
+}
+
+.import-metadata-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.import-metadata-value {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.import-warning {
+    padding: var(--spacing-md);
+    background-color: #FFF3E0;
+    border-left: 4px solid var(--warning-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+}
+
 /* ==================== Loading Overlay ==================== */
 .loading-overlay {
     position: fixed;
@@ -764,6 +815,7 @@ body {
     border-radius: var(--radius-sm);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     min-width: 250px;
+    font-weight: 500;
     animation: slideIn 0.3s ease;
 }
 

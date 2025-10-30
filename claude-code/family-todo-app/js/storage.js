@@ -90,20 +90,67 @@ const Storage = {
   },
 
   /**
-   * Export tasks as JSON file
+   * Export tasks as JSON file with metadata
    * @param {Array} tasks - Array of task objects
+   * @param {Object} metadata - Additional export metadata
    * @returns {string} JSON string
    */
-  exportToJSON(tasks) {
+  exportToJSON(tasks, metadata = {}) {
+    const now = new Date();
+    const browserInfo = this.getBrowserInfo();
+
     const data = {
+      metadata: {
+        exportDate: now.toISOString(),
+        exportDateDisplay: now.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        device: browserInfo,
+        user: metadata.userId || 'unknown',
+        userName: metadata.userName || 'Unknown User',
+        taskCount: tasks.length,
+        appVersion: CONFIG.STORAGE_VERSION,
+        exportType: metadata.exportType || 'all'
+      },
+      // Legacy fields for backward compatibility
       appName: CONFIG.APP_NAME,
       version: CONFIG.STORAGE_VERSION,
-      exportedAt: new Date().toISOString(),
+      exportedAt: now.toISOString(),
       tasksCount: tasks.length,
       tasks: tasks
     };
 
     return JSON.stringify(data, null, 2);
+  },
+
+  /**
+   * Get browser and device information
+   * @returns {string} Browser info string
+   */
+  getBrowserInfo() {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown';
+    let os = 'Unknown';
+
+    // Detect OS
+    if (ua.includes('Mac')) os = 'Mac';
+    else if (ua.includes('Win')) os = 'Windows';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('iPhone')) os = 'iPhone';
+    else if (ua.includes('iPad')) os = 'iPad';
+    else if (ua.includes('Android')) os = 'Android';
+
+    // Detect Browser
+    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Edg')) browser = 'Edge';
+
+    return `${os} / ${browser}`;
   },
 
   /**

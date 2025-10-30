@@ -436,6 +436,39 @@
         </div>
     </div>
 
+    <!-- Modal: Import Confirmation -->
+    <div id="import-confirm-modal" class="modal" role="dialog" aria-labelledby="import-confirm-title" aria-hidden="true">
+        <div class="modal-overlay" onclick="UI.cancelImport()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="import-confirm-title">📋 Confirm Import</h2>
+                <button onclick="UI.cancelImport()" class="modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="import-metadata" class="import-metadata">
+                    <!-- Metadata populated dynamically -->
+                </div>
+
+                <div class="import-warning">
+                    <strong>⚠️ Warning:</strong> <span id="import-warning-text">This will replace your current tasks.</span>
+                </div>
+
+                <label class="checkbox-label" style="margin-top: var(--spacing-md);">
+                    <input type="checkbox" id="auto-import-checkbox">
+                    <span>Don't ask again (auto-import future files)</span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="UI.cancelImport()" class="btn btn-secondary">
+                    Cancel
+                </button>
+                <button type="button" onclick="UI.confirmImportAfterReview()" class="btn btn-primary">
+                    Import & Replace
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay" style="display: none;">
         <div class="loading-spinner"></div>

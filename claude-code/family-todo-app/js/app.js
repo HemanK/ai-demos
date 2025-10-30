@@ -451,8 +451,11 @@ const App = {
 
   /**
    * Render tasks grouped by member
+   * @param {Array} tasks - Array of tasks
+   * @param {string} emptyMessage - Message to show when no tasks
+   * @param {string} modalType - Type of modal ('briefing' or 'risk')
    */
-  renderTasksByMember(tasks, emptyMessage) {
+  renderTasksByMember(tasks, emptyMessage, modalType = 'briefing') {
     if (tasks.length === 0) {
       return `<p class="empty-message">${emptyMessage}</p>`;
     }
@@ -469,6 +472,11 @@ const App = {
 
     let html = '';
 
+    // Determine which handler to use based on modal type
+    const clickHandler = modalType === 'risk'
+      ? 'UI.handleEditTaskFromRisk'
+      : 'UI.handleEditTaskFromBriefing';
+
     // Render each member's tasks
     Object.keys(tasksByMember).forEach(memberId => {
       const memberTasks = tasksByMember[memberId];
@@ -484,7 +492,7 @@ const App = {
 
       memberTasks.slice(0, 10).forEach(task => {
         html += `
-          <li class="priority-${task.priority.toLowerCase()}" data-task-id="${task.id}" onclick="UI.handleEditTask('${task.id}'); UI.closeBriefingModal();">
+          <li class="priority-${task.priority.toLowerCase()}" data-task-id="${task.id}" onclick="${clickHandler}('${task.id}')">
             <div class="task-title-brief">${Utils.escapeHtml(task.title)}</div>
             <div class="task-meta-brief">
               ${Utils.getCategoryInfo(task.category).emoji} ${task.category}
@@ -552,7 +560,7 @@ const App = {
         </div>
         <div class="risk-section">
       `;
-      html += this.renderTasksByMember(overdueTasks, '');
+      html += this.renderTasksByMember(overdueTasks, '', 'risk');
       html += '</div>';
     } else {
       html += `
@@ -572,7 +580,7 @@ const App = {
         </div>
         <div class="risk-section">
       `;
-      html += this.renderTasksByMember(upcomingHighPriority, '');
+      html += this.renderTasksByMember(upcomingHighPriority, '', 'risk');
       html += '</div>';
     } else {
       html += `

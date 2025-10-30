@@ -529,6 +529,7 @@ const UI = {
       // Check if user wants to export all or just filtered
       let tasksToExport;
       let filenamePrefix;
+      let exportType;
 
       if (this.isFiltered() && filteredTasks.length < TaskManager.tasks.length) {
         // Ask user: export all or just filtered?
@@ -541,20 +542,24 @@ const UI = {
         if (exportFiltered) {
           tasksToExport = filteredTasks;
           filenamePrefix = 'filtered';
+          exportType = 'filtered';
         } else {
           tasksToExport = TaskManager.getAllTasks();
           filenamePrefix = CONFIG.EXPORT.FILENAME_PREFIX;
+          exportType = 'all';
         }
       } else {
         // No filters active, export all
         tasksToExport = TaskManager.getAllTasks();
         filenamePrefix = CONFIG.EXPORT.FILENAME_PREFIX;
+        exportType = 'all';
       }
 
       // Store export data for later use
       this.pendingExport = {
         tasks: tasksToExport,
-        prefix: filenamePrefix
+        prefix: filenamePrefix,
+        exportType: exportType
       };
 
       // Open filename modal instead of using prompt()
@@ -650,8 +655,21 @@ const UI = {
         filename += '.json';
       }
 
-      // Generate JSON
-      const jsonData = Storage.exportToJSON(this.pendingExport.tasks);
+      // Get current user info
+      const currentUserSelect = document.getElementById('current-user');
+      const userId = currentUserSelect?.value || 'all';
+      const userMember = CONFIG.FAMILY_MEMBERS.find(m => m.id === userId);
+      const userName = userMember ? userMember.name : 'All Members';
+
+      // Prepare metadata
+      const metadata = {
+        userId: userId,
+        userName: userName,
+        exportType: this.pendingExport.exportType || 'all'
+      };
+
+      // Generate JSON with metadata
+      const jsonData = Storage.exportToJSON(this.pendingExport.tasks, metadata);
       const blob = new Blob([jsonData], { type: CONFIG.EXPORT.MIME_TYPE });
       const url = URL.createObjectURL(blob);
 
@@ -724,6 +742,19 @@ const UI = {
   },
 
   /**
+   * Handle edit task from briefing modal
+   * Closes briefing first, then opens edit modal
+   * @param {string} taskId - Task ID
+   */
+  handleEditTaskFromBriefing(taskId) {
+    this.closeBriefingModal();
+    // Wait for modal close animation (300ms) before opening edit
+    setTimeout(() => {
+      this.openEditTaskModal(taskId);
+    }, 350);
+  },
+
+  /**
    * Show risk modal with HTML content
    * @param {string} html - HTML content to display
    */
@@ -750,7 +781,21 @@ const UI = {
   },
 
   /**
+   * Handle edit task from risk modal
+   * Closes risk first, then opens edit modal
+   * @param {string} taskId - Task ID
+   */
+  handleEditTaskFromRisk(taskId) {
+    this.closeRiskModal();
+    // Wait for modal close animation (300ms) before opening edit
+    setTimeout(() => {
+      this.openEditTaskModal(taskId);
+    }, 350);
+  },
+
+  /**
    * Handle import tasks
+   * Shows confirmation modal unless auto-import is enabled
    * @param {File} file - File object
    */
   handleImport(file) {
@@ -760,14 +805,16 @@ const UI = {
     reader.onload = (e) => {
       try {
         const jsonString = e.target.result;
-        const result = TaskManager.importTasks(jsonString, true); // merge=true
 
-        if (result.success) {
-          this.renderTaskList();
-          this.updateStats();
-          Utils.showToast(`Imported ${result.imported} tasks`, 'success');
+        // Check if auto-import is enabled
+        const autoImport = localStorage.getItem('autoImport') === 'true';
+
+        if (autoImport) {
+          // Import directly without confirmation
+          this.executeImport(jsonString);
         } else {
-          Utils.showToast(`Import error: ${result.error}`, 'error');
+          // Show confirmation modal
+          this.showImportConfirmation(jsonString);
         }
       } catch (err) {
         console.error('Import error:', err);
@@ -780,6 +827,126 @@ const UI = {
     };
 
     reader.readAsText(file);
+  },
+
+  /**
+   * Show import confirmation modal with metadata
+   * @param {string} jsonString - JSON string to import
+   */
+  showImportConfirmation(jsonString) {
+    try {
+      const data = JSON.parse(jsonString);
+      const metadata = data.metadata || {};
+      const currentTaskCount = TaskManager.tasks.length;
+
+      // Build metadata display HTML
+      let metadataHTML = '<h3 style="margin-bottom: var(--spacing-md);">Export Details:</h3>';
+      metadataHTML += '<div class="import-metadata-row">';
+      metadataHTML += '<span class="import-metadata-label">Exported:</span>';
+      metadataHTML += `<span class="import-metadata-value">${metadata.exportDateDisplay || 'Unknown'}</span>`;
+      metadataHTML += '</div>';
+
+      metadataHTML += '<div class="import-metadata-row">';
+      metadataHTML += '<span class="import-metadata-label">Device:</span>';
+      metadataHTML += `<span class="import-metadata-value">${metadata.device || 'Unknown'}</span>`;
+      metadataHTML += '</div>';
+
+      metadataHTML += '<div class="import-metadata-row">';
+      metadataHTML += '<span class="import-metadata-label">User:</span>';
+      metadataHTML += `<span class="import-metadata-value">${metadata.userName || 'Unknown'}</span>`;
+      metadataHTML += '</div>';
+
+      metadataHTML += '<div class="import-metadata-row">';
+      metadataHTML += '<span class="import-metadata-label">Tasks in File:</span>';
+      metadataHTML += `<span class="import-metadata-value">${metadata.taskCount || data.tasksCount || 0}</span>`;
+      metadataHTML += '</div>';
+
+      metadataHTML += '<div class="import-metadata-row">';
+      metadataHTML += '<span class="import-metadata-label">Export Type:</span>';
+      metadataHTML += `<span class="import-metadata-value">${metadata.exportType || 'all'}</span>`;
+      metadataHTML += '</div>';
+
+      metadataHTML += '<h3 style="margin-top: var(--spacing-md); margin-bottom: var(--spacing-md);">Current App:</h3>';
+      metadataHTML += '<div class="import-metadata-row">';
+      metadataHTML += '<span class="import-metadata-label">Current Tasks:</span>';
+      metadataHTML += `<span class="import-metadata-value">${currentTaskCount}</span>`;
+      metadataHTML += '</div>';
+
+      // Update modal content
+      const metadataEl = document.getElementById('import-metadata');
+      if (metadataEl) metadataEl.innerHTML = metadataHTML;
+
+      // Update warning text
+      const warningEl = document.getElementById('import-warning-text');
+      if (warningEl) {
+        warningEl.textContent = `This will replace your current ${currentTaskCount} task${currentTaskCount !== 1 ? 's' : ''} with ${metadata.taskCount || data.tasksCount || 0} task${(metadata.taskCount || data.tasksCount) !== 1 ? 's' : ''} from the file.`;
+      }
+
+      // Store JSON for later import
+      this.pendingImport = jsonString;
+
+      // Show modal
+      const modal = document.getElementById('import-confirm-modal');
+      if (modal) {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+    } catch (err) {
+      console.error('Error parsing import file:', err);
+      Utils.showToast('Invalid JSON file', 'error');
+    }
+  },
+
+  /**
+   * Cancel import and close modal
+   */
+  cancelImport() {
+    const modal = document.getElementById('import-confirm-modal');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+    this.pendingImport = null;
+  },
+
+  /**
+   * Confirm import after user reviews metadata
+   */
+  confirmImportAfterReview() {
+    if (!this.pendingImport) return;
+
+    // Check if user wants to enable auto-import
+    const autoImportCheckbox = document.getElementById('auto-import-checkbox');
+    if (autoImportCheckbox && autoImportCheckbox.checked) {
+      localStorage.setItem('autoImport', 'true');
+    }
+
+    // Close modal
+    this.cancelImport();
+
+    // Execute import
+    this.executeImport(this.pendingImport);
+  },
+
+  /**
+   * Execute the actual import
+   * @param {string} jsonString - JSON string to import
+   */
+  executeImport(jsonString) {
+    try {
+      const result = TaskManager.importTasks(jsonString, true); // merge=true
+
+      if (result.success) {
+        this.renderTaskList();
+        this.updateStats();
+        Utils.showToast(`Imported ${result.imported} tasks`, 'success');
+      } else {
+        Utils.showToast(`Import error: ${result.error}`, 'error');
+      }
+    } catch (err) {
+      console.error('Import error:', err);
+      Utils.showToast('Error importing tasks', 'error');
+    }
   }
 };
 
