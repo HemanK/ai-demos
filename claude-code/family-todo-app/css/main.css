@@ -517,6 +517,72 @@ body {
     color: #C62828;
 }
 
+/* ==================== Export Filename Modal ==================== */
+.modal-small .modal-content {
+    max-width: 500px;
+}
+
+.char-count {
+    float: right;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.form-helper {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.export-help {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    padding: var(--spacing-xs) 0;
+    text-align: left;
+    width: 100%;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.help-content {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+}
+
+.help-content h4 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+}
+
+.help-content ol {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+}
+
+.help-content li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.help-content p {
+    margin: var(--spacing-sm) 0 0 0;
+}
+
 /* ==================== Loading Overlay ==================== */
 .loading-overlay {
     position: fixed;

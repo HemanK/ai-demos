@@ -327,6 +327,61 @@
         </div>
     </div>
 
+    <!-- Modal: Export Filename -->
+    <div id="filename-modal" class="modal" role="dialog" aria-labelledby="filename-modal-title" aria-hidden="true">
+        <div class="modal-overlay" onclick="UI.closeFilenameModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 id="filename-modal-title">Export Tasks</h2>
+                <button onclick="UI.closeFilenameModal()" class="modal-close" aria-label="Close modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="export-filename" class="form-label">
+                        Filename <span class="char-count" id="filename-char-count">0 chars</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="export-filename"
+                        class="form-input"
+                        placeholder="tasks-1029.json"
+                        autocomplete="off"
+                    >
+                    <p class="form-helper">
+                        <strong id="export-task-count">0 tasks</strong> will be exported.
+                        File saves to your browser's download folder.
+                    </p>
+                </div>
+
+                <div class="export-help">
+                    <button type="button" class="btn-link" onclick="UI.toggleExportHelp()">
+                        <span id="help-toggle-icon">▶</span> How does export work?
+                    </button>
+                    <div id="export-help-content" class="help-content" style="display: none;">
+                        <h4>Multi-User Workflow:</h4>
+                        <ol>
+                            <li>Export saves to your device's Downloads folder</li>
+                            <li>Manually upload to shared Google Drive folder</li>
+                            <li>Other users can download and import</li>
+                            <li>Tip: Use descriptive filenames (e.g., "john-tasks-1029.json")</li>
+                        </ol>
+                        <p><strong>Note:</strong> Browser security prevents auto-saving to specific folders. Cloud sync coming in v2.0!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="UI.confirmExport()" class="btn btn-primary">
+                    Export
+                </button>
+                <button type="button" onclick="UI.closeFilenameModal()" class="btn btn-secondary">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay" style="display: none;">
         <div class="loading-spinner"></div>

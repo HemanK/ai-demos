@@ -519,7 +519,7 @@ const UI = {
 
   /**
    * Handle export tasks
-   * Exports currently filtered/visible tasks with custom filename option
+   * Exports currently filtered/visible tasks with custom filename modal
    */
   handleExport() {
     try {
@@ -540,7 +540,7 @@ const UI = {
 
         if (exportFiltered) {
           tasksToExport = filteredTasks;
-          filenamePrefix = 'filtered-tasks';
+          filenamePrefix = 'filtered';
         } else {
           tasksToExport = TaskManager.getAllTasks();
           filenamePrefix = CONFIG.EXPORT.FILENAME_PREFIX;
@@ -551,27 +551,111 @@ const UI = {
         filenamePrefix = CONFIG.EXPORT.FILENAME_PREFIX;
       }
 
+      // Store export data for later use
+      this.pendingExport = {
+        tasks: tasksToExport,
+        prefix: filenamePrefix
+      };
+
+      // Open filename modal instead of using prompt()
+      this.openFilenameModal(tasksToExport.length, filenamePrefix);
+
+    } catch (e) {
+      console.error('Export error:', e);
+      Utils.showToast('Error exporting tasks', 'error');
+    }
+  },
+
+  /**
+   * Open filename modal for export
+   * @param {number} taskCount - Number of tasks to export
+   * @param {string} prefix - Filename prefix
+   */
+  openFilenameModal(taskCount, prefix) {
+    const modal = document.getElementById('filename-modal');
+    if (!modal) return;
+
+    // Generate default filename with shorter format: prefix-MMDD.json
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const defaultFilename = `${prefix}-${month}${day}.json`;
+
+    // Populate modal
+    const filenameInput = document.getElementById('export-filename');
+    const taskCountEl = document.getElementById('export-task-count');
+    const charCountEl = document.getElementById('filename-char-count');
+
+    if (filenameInput) {
+      filenameInput.value = defaultFilename;
+      filenameInput.focus();
+      filenameInput.select();
+
+      // Update character count
+      if (charCountEl) {
+        charCountEl.textContent = `${defaultFilename.length} chars`;
+      }
+
+      // Add input listener for character count
+      filenameInput.addEventListener('input', (e) => {
+        if (charCountEl) {
+          charCountEl.textContent = `${e.target.value.length} chars`;
+        }
+      });
+    }
+
+    if (taskCountEl) {
+      taskCountEl.textContent = `${taskCount} task${taskCount !== 1 ? 's' : ''}`;
+    }
+
+    // Show modal
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  },
+
+  /**
+   * Close filename modal
+   */
+  closeFilenameModal() {
+    const modal = document.getElementById('filename-modal');
+    if (!modal) return;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+
+    // Clear pending export
+    this.pendingExport = null;
+
+    // Collapse help if expanded
+    const helpContent = document.getElementById('export-help-content');
+    if (helpContent) {
+      helpContent.style.display = 'none';
+      const icon = document.getElementById('help-toggle-icon');
+      if (icon) icon.textContent = '▶';
+    }
+  },
+
+  /**
+   * Confirm and execute export
+   */
+  confirmExport() {
+    if (!this.pendingExport) return;
+
+    try {
+      const filenameInput = document.getElementById('export-filename');
+      let filename = filenameInput?.value.trim() || 'tasks.json';
+
+      // Ensure .json extension
+      if (!filename.endsWith('.json')) {
+        filename += '.json';
+      }
+
       // Generate JSON
-      const jsonData = Storage.exportToJSON(tasksToExport);
+      const jsonData = Storage.exportToJSON(this.pendingExport.tasks);
       const blob = new Blob([jsonData], { type: CONFIG.EXPORT.MIME_TYPE });
       const url = URL.createObjectURL(blob);
 
-      // Prompt for custom filename
-      const defaultFilename = `${filenamePrefix}-${Utils.formatDate(new Date())}.json`;
-      const customFilename = prompt(
-        `Enter filename for export (${tasksToExport.length} tasks):`,
-        defaultFilename
-      );
-
-      if (!customFilename) {
-        // User cancelled
-        URL.revokeObjectURL(url);
-        return;
-      }
-
-      // Ensure .json extension
-      const filename = customFilename.endsWith('.json') ? customFilename : `${customFilename}.json`;
-
+      // Trigger download
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
@@ -580,11 +664,36 @@ const UI = {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      // Mark backup completed
       Storage.markBackupCompleted();
-      Utils.showToast(`Exported ${tasksToExport.length} tasks to ${filename}`, 'success', 4000);
+
+      // Close modal
+      this.closeFilenameModal();
+
+      // Show success message
+      Utils.showToast(`Exported ${this.pendingExport.tasks.length} tasks to ${filename}`, 'success', 4000);
+
     } catch (e) {
       console.error('Export error:', e);
       Utils.showToast('Error exporting tasks', 'error');
+    }
+  },
+
+  /**
+   * Toggle export help section
+   */
+  toggleExportHelp() {
+    const helpContent = document.getElementById('export-help-content');
+    const icon = document.getElementById('help-toggle-icon');
+
+    if (!helpContent || !icon) return;
+
+    if (helpContent.style.display === 'none') {
+      helpContent.style.display = 'block';
+      icon.textContent = '▼';
+    } else {
+      helpContent.style.display = 'none';
+      icon.textContent = '▶';
     }
   },
 
