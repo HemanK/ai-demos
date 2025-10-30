@@ -644,7 +644,11 @@ const UI = {
    * Confirm and execute export
    */
   confirmExport() {
-    if (!this.pendingExport) return;
+    if (!this.pendingExport) {
+      console.error('Export error: No pending export data');
+      Utils.showToast('Export error: No data to export', 'error');
+      return;
+    }
 
     try {
       const filenameInput = document.getElementById('export-filename');
@@ -668,8 +672,15 @@ const UI = {
         exportType: this.pendingExport.exportType || 'all'
       };
 
+      console.log('Generating JSON export...', { taskCount: this.pendingExport.tasks.length, filename });
+
       // Generate JSON with metadata
       const jsonData = Storage.exportToJSON(this.pendingExport.tasks, metadata);
+
+      if (!jsonData) {
+        throw new Error('Failed to generate JSON data');
+      }
+
       const blob = new Blob([jsonData], { type: CONFIG.EXPORT.MIME_TYPE });
       const url = URL.createObjectURL(blob);
 
@@ -679,8 +690,12 @@ const UI = {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
+
+      // Clean up DOM
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      console.log('Export successful:', filename);
 
       // Mark backup completed
       Storage.markBackupCompleted();
@@ -688,12 +703,12 @@ const UI = {
       // Close modal
       this.closeFilenameModal();
 
-      // Show success message
-      Utils.showToast(`Exported ${this.pendingExport.tasks.length} tasks to ${filename}`, 'success', 4000);
+      // Show success message (green toast)
+      Utils.showToast(`✓ Exported ${this.pendingExport.tasks.length} tasks to ${filename}`, 'success', 4000);
 
     } catch (e) {
       console.error('Export error:', e);
-      Utils.showToast('Error exporting tasks', 'error');
+      Utils.showToast(`Export failed: ${e.message || 'Unknown error'}`, 'error');
     }
   },
 
@@ -801,6 +816,7 @@ const UI = {
   handleImport(file) {
     if (!file) return;
 
+    const filename = file.name;  // Store filename
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -813,8 +829,8 @@ const UI = {
           // Import directly without confirmation
           this.executeImport(jsonString);
         } else {
-          // Show confirmation modal
-          this.showImportConfirmation(jsonString);
+          // Show confirmation modal with filename
+          this.showImportConfirmation(jsonString, filename);
         }
       } catch (err) {
         console.error('Import error:', err);
@@ -832,15 +848,20 @@ const UI = {
   /**
    * Show import confirmation modal with metadata
    * @param {string} jsonString - JSON string to import
+   * @param {string} filename - Filename of the imported file
    */
-  showImportConfirmation(jsonString) {
+  showImportConfirmation(jsonString, filename = 'Unknown file') {
     try {
       const data = JSON.parse(jsonString);
       const metadata = data.metadata || {};
       const currentTaskCount = TaskManager.tasks.length;
 
-      // Build metadata display HTML
-      let metadataHTML = '<h3 style="margin-bottom: var(--spacing-md);">Export Details:</h3>';
+      // Build metadata display HTML with filename at top
+      let metadataHTML = `<div style="background-color: var(--bg-tertiary); padding: var(--spacing-sm); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md); word-break: break-all;">
+        <strong>📄 File:</strong> ${Utils.escapeHtml(filename)}
+      </div>`;
+
+      metadataHTML += '<h3 style="margin-bottom: var(--spacing-md);">Export Details:</h3>';
       metadataHTML += '<div class="import-metadata-row">';
       metadataHTML += '<span class="import-metadata-label">Exported:</span>';
       metadataHTML += `<span class="import-metadata-value">${metadata.exportDateDisplay || 'Unknown'}</span>`;
@@ -915,17 +936,20 @@ const UI = {
   confirmImportAfterReview() {
     if (!this.pendingImport) return;
 
+    // Store the JSON string before clearing
+    const jsonToImport = this.pendingImport;
+
     // Check if user wants to enable auto-import
     const autoImportCheckbox = document.getElementById('auto-import-checkbox');
     if (autoImportCheckbox && autoImportCheckbox.checked) {
       localStorage.setItem('autoImport', 'true');
     }
 
-    // Close modal
+    // Close modal (this clears this.pendingImport)
     this.cancelImport();
 
-    // Execute import
-    this.executeImport(this.pendingImport);
+    // Execute import with the stored JSON string
+    this.executeImport(jsonToImport);
   },
 
   /**
