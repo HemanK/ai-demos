@@ -698,6 +698,58 @@ const UI = {
   },
 
   /**
+   * Show briefing modal with HTML content
+   * @param {string} html - HTML content to display
+   */
+  showBriefingModal(html) {
+    const modal = document.getElementById('briefing-modal');
+    const content = document.getElementById('briefing-content');
+
+    if (!modal || !content) return;
+
+    content.innerHTML = html;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  },
+
+  /**
+   * Close briefing modal
+   */
+  closeBriefingModal() {
+    const modal = document.getElementById('briefing-modal');
+    if (!modal) return;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  },
+
+  /**
+   * Show risk modal with HTML content
+   * @param {string} html - HTML content to display
+   */
+  showRiskModal(html) {
+    const modal = document.getElementById('risk-modal');
+    const content = document.getElementById('risk-content');
+
+    if (!modal || !content) return;
+
+    content.innerHTML = html;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  },
+
+  /**
+   * Close risk modal
+   */
+  closeRiskModal() {
+    const modal = document.getElementById('risk-modal');
+    if (!modal) return;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  },
+
+  /**
    * Handle import tasks
    * @param {File} file - File object
    */

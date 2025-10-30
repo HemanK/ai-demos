@@ -116,7 +116,7 @@ const CONFIG = {
 
   // Export/Import
   EXPORT: {
-    FILENAME_PREFIX: 'tasks', // Short prefix for mobile-friendly filenames
+    FILENAME_PREFIX: 'todo-tasks', // Clear prefix identifying app purpose
     MIME_TYPE: 'application/json',
     AUTO_BACKUP_DAYS: 7 // Remind every 7 days
   }

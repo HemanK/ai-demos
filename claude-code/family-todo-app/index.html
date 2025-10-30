@@ -345,28 +345,44 @@
                         type="text"
                         id="export-filename"
                         class="form-input"
-                        placeholder="tasks-1029.json"
+                        placeholder="todo-tasks-1029.json"
                         autocomplete="off"
                     >
                     <p class="form-helper">
                         <strong id="export-task-count">0 tasks</strong> will be exported.
-                        File saves to your browser's download folder.
+                        File saves to your browser's download folder as a JSON file.
                     </p>
                 </div>
 
                 <div class="export-help">
                     <button type="button" class="btn-link" onclick="UI.toggleExportHelp()">
-                        <span id="help-toggle-icon">▶</span> How does export work?
+                        <span id="help-toggle-icon">▶</span> How does export/import work?
                     </button>
                     <div id="export-help-content" class="help-content" style="display: none;">
+                        <h4>About JSON Files:</h4>
+                        <ul>
+                            <li><strong>Can't open directly:</strong> JSON files are data files, not documents. Chrome/Safari won't display them.</li>
+                            <li><strong>To use:</strong> Import the file back into this app to restore your tasks.</li>
+                            <li><strong>Backup:</strong> Keep exports safe - they're your only backup!</li>
+                        </ul>
+
                         <h4>Multi-User Workflow:</h4>
                         <ol>
-                            <li>Export saves to your device's Downloads folder</li>
-                            <li>Manually upload to shared Google Drive folder</li>
-                            <li>Other users can download and import</li>
-                            <li>Tip: Use descriptive filenames (e.g., "john-tasks-1029.json")</li>
+                            <li><strong>Export:</strong> Saves to Downloads folder on your device</li>
+                            <li><strong>Share:</strong> Upload to shared Google Drive/iCloud folder</li>
+                            <li><strong>Import:</strong> Tap Import → navigate to iCloud/Drive/Downloads → select file</li>
+                            <li><strong>Tip:</strong> Use descriptive names (e.g., "john-todo-tasks-1029.json")</li>
                         </ol>
-                        <p><strong>Note:</strong> Browser security prevents auto-saving to specific folders. Cloud sync coming in v2.0!</p>
+
+                        <h4>File Picker Access:</h4>
+                        <p>The Import button opens your device's file picker, which CAN access:</p>
+                        <ul>
+                            <li>✅ Downloads folder</li>
+                            <li>✅ iCloud Drive (iPhone/Mac)</li>
+                            <li>✅ Google Drive (if installed)</li>
+                            <li>✅ Other cloud storage apps</li>
+                        </ul>
+                        <p><strong>Note:</strong> Browser security prevents remembering your export location, but the file picker gives you full access to all your files and cloud storage.</p>
                     </div>
                 </div>
             </div>
@@ -377,6 +393,44 @@
                 </button>
                 <button type="button" onclick="UI.closeFilenameModal()" class="btn btn-secondary">
                     Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Daily Briefing -->
+    <div id="briefing-modal" class="modal" role="dialog" aria-labelledby="briefing-modal-title" aria-hidden="true">
+        <div class="modal-overlay" onclick="UI.closeBriefingModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="briefing-modal-title">📅 Daily Briefing</h2>
+                <button onclick="UI.closeBriefingModal()" class="modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body" id="briefing-content">
+                <!-- Content populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="UI.closeBriefingModal()" class="btn btn-primary">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Risk Analysis -->
+    <div id="risk-modal" class="modal" role="dialog" aria-labelledby="risk-modal-title" aria-hidden="true">
+        <div class="modal-overlay" onclick="UI.closeRiskModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="risk-modal-title">⚠️ Risk Analysis</h2>
+                <button onclick="UI.closeRiskModal()" class="modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body" id="risk-content">
+                <!-- Content populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="UI.closeRiskModal()" class="btn btn-primary">
+                    Got it
                 </button>
             </div>
         </div>

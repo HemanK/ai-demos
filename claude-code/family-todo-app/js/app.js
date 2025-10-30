@@ -416,37 +416,92 @@ const App = {
     const todayTasks = TaskManager.tasks.filter(t => t.status !== 'completed' && t.dueDate === today);
     const tomorrowTasks = TaskManager.tasks.filter(t => t.status !== 'completed' && t.dueDate === tomorrowStr);
 
-    let message = `📅 Daily Briefing\n\n`;
-    message += `📊 Overview:\n`;
-    message += `• ${stats.pending + stats.inProgress} pending tasks\n`;
-    message += `• ${stats.overdue} overdue tasks\n`;
-    message += `• ${stats.completedToday} completed today\n\n`;
+    // Generate HTML content
+    let html = `
+      <div class="briefing-section">
+        <div class="briefing-stats">
+          <div class="stat-card">
+            <span class="stat-value">${stats.pending + stats.inProgress}</span>
+            <span class="stat-label">Pending</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">${stats.overdue}</span>
+            <span class="stat-label">Overdue</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">${stats.completedToday}</span>
+            <span class="stat-label">Completed Today</span>
+          </div>
+        </div>
+      </div>
+    `;
 
-    message += `TODAY (${todayTasks.length} tasks):\n`;
-    if (todayTasks.length === 0) {
-      message += `✓ All caught up!\n`;
-    } else {
-      todayTasks.slice(0, 5).forEach(t => {
-        message += `• ${t.title} (${t.priority})\n`;
-      });
-      if (todayTasks.length > 5) {
-        message += `... and ${todayTasks.length - 5} more\n`;
-      }
+    // Today's tasks by member
+    html += '<div class="briefing-section"><h3>📅 Today</h3>';
+    html += this.renderTasksByMember(todayTasks, 'No tasks for today - all caught up!');
+    html += '</div>';
+
+    // Tomorrow's tasks by member
+    html += '<div class="briefing-section"><h3>📆 Tomorrow</h3>';
+    html += this.renderTasksByMember(tomorrowTasks, 'Nothing scheduled for tomorrow');
+    html += '</div>';
+
+    UI.showBriefingModal(html);
+  },
+
+  /**
+   * Render tasks grouped by member
+   */
+  renderTasksByMember(tasks, emptyMessage) {
+    if (tasks.length === 0) {
+      return `<p class="empty-message">${emptyMessage}</p>`;
     }
 
-    message += `\nTOMORROW (${tomorrowTasks.length} tasks):\n`;
-    if (tomorrowTasks.length === 0) {
-      message += `✓ Nothing scheduled\n`;
-    } else {
-      tomorrowTasks.slice(0, 5).forEach(t => {
-        message += `• ${t.title} (${t.priority})\n`;
-      });
-      if (tomorrowTasks.length > 5) {
-        message += `... and ${tomorrowTasks.length - 5} more\n`;
+    // Group tasks by assigned member
+    const tasksByMember = {};
+    tasks.forEach(task => {
+      const memberId = task.assignedTo || 'unassigned';
+      if (!tasksByMember[memberId]) {
+        tasksByMember[memberId] = [];
       }
-    }
+      tasksByMember[memberId].push(task);
+    });
 
-    alert(message);
+    let html = '';
+
+    // Render each member's tasks
+    Object.keys(tasksByMember).forEach(memberId => {
+      const memberTasks = tasksByMember[memberId];
+      const member = CONFIG.FAMILY_MEMBERS.find(m => m.id === memberId) || { name: 'Unassigned', color: '#F5F5F5' };
+
+      html += `
+        <div class="member-group">
+          <div class="member-group-header" style="background-color: ${member.color}">
+            ${member.name} (${memberTasks.length} task${memberTasks.length !== 1 ? 's' : ''})
+          </div>
+          <ul class="task-list-simple">
+      `;
+
+      memberTasks.slice(0, 10).forEach(task => {
+        html += `
+          <li class="priority-${task.priority.toLowerCase()}" data-task-id="${task.id}" onclick="UI.handleEditTask('${task.id}'); UI.closeBriefingModal();">
+            <div class="task-title-brief">${Utils.escapeHtml(task.title)}</div>
+            <div class="task-meta-brief">
+              ${Utils.getCategoryInfo(task.category).emoji} ${task.category}
+              • Priority: ${task.priority}
+            </div>
+          </li>
+        `;
+      });
+
+      if (memberTasks.length > 10) {
+        html += `<li class="empty-message">... and ${memberTasks.length - 10} more tasks</li>`;
+      }
+
+      html += '</ul></div>';
+    });
+
+    return html;
   },
 
   /**
@@ -486,34 +541,49 @@ const App = {
       return t.priority === 'High' && dueDate >= today && dueDate <= threeDaysFromNow;
     });
 
-    let message = `⚠️ Risk Analysis\n\n`;
+    let html = '';
 
+    // Overdue tasks
     if (overdueTasks.length > 0) {
-      message += `🔴 ${overdueTasks.length} OVERDUE tasks:\n`;
-      overdueTasks.slice(0, 5).forEach(t => {
-        message += `• ${t.title} (due ${Utils.formatDateHuman(t.dueDate)})\n`;
-      });
-      if (overdueTasks.length > 5) {
-        message += `... and ${overdueTasks.length - 5} more\n`;
-      }
-      message += `\n`;
+      html += `
+        <div class="risk-alert risk-danger">
+          <strong>🔴 ${overdueTasks.length} OVERDUE Task${overdueTasks.length !== 1 ? 's' : ''}</strong>
+          <p>These tasks are past their due date and need immediate attention.</p>
+        </div>
+        <div class="risk-section">
+      `;
+      html += this.renderTasksByMember(overdueTasks, '');
+      html += '</div>';
     } else {
-      message += `✅ No overdue tasks!\n\n`;
+      html += `
+        <div class="risk-alert risk-success">
+          <strong>✅ No Overdue Tasks</strong>
+          <p>All tasks are on track!</p>
+        </div>
+      `;
     }
 
+    // Upcoming high-priority tasks
     if (upcomingHighPriority.length > 0) {
-      message += `🟡 ${upcomingHighPriority.length} HIGH PRIORITY tasks due in 3 days:\n`;
-      upcomingHighPriority.slice(0, 5).forEach(t => {
-        message += `• ${t.title} (due ${Utils.getRelativeDateLabel(t.dueDate)})\n`;
-      });
-      if (upcomingHighPriority.length > 5) {
-        message += `... and ${upcomingHighPriority.length - 5} more\n`;
-      }
+      html += `
+        <div class="risk-alert">
+          <strong>🟡 ${upcomingHighPriority.length} High-Priority Task${upcomingHighPriority.length !== 1 ? 's' : ''} Due in 3 Days</strong>
+          <p>Plan ahead to ensure these critical tasks are completed on time.</p>
+        </div>
+        <div class="risk-section">
+      `;
+      html += this.renderTasksByMember(upcomingHighPriority, '');
+      html += '</div>';
     } else {
-      message += `✅ No high-priority tasks due soon.\n`;
+      html += `
+        <div class="risk-alert risk-success">
+          <strong>✅ No High-Priority Tasks Due Soon</strong>
+          <p>Your schedule looks manageable for the next 3 days.</p>
+        </div>
+      `;
     }
 
-    alert(message);
+    UI.showRiskModal(html);
   }
 };
 

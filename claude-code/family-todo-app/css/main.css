@@ -522,6 +522,10 @@ body {
     max-width: 500px;
 }
 
+.modal-large .modal-content {
+    max-width: 700px;
+}
+
 .char-count {
     float: right;
     font-size: var(--font-size-sm);
@@ -581,6 +585,129 @@ body {
 
 .help-content p {
     margin: var(--spacing-sm) 0 0 0;
+}
+
+/* ==================== Briefing & Risk Analysis Modals ==================== */
+.briefing-section, .risk-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.briefing-section h3, .risk-section h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.briefing-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+    padding: var(--spacing-md);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.member-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.member-group-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.task-list-simple {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.task-list-simple li {
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--border-color);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.task-list-simple li:hover {
+    background-color: var(--bg-tertiary);
+    transform: translateX(4px);
+}
+
+.task-list-simple .task-title-brief {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.task-list-simple .task-meta-brief {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.priority-high {
+    border-left-color: var(--danger-color) !important;
+}
+
+.priority-medium {
+    border-left-color: var(--warning-color) !important;
+}
+
+.priority-low {
+    border-left-color: var(--success-color) !important;
+}
+
+.empty-message {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.risk-alert {
+    padding: var(--spacing-md);
+    background-color: #FFF3E0;
+    border-left: 4px solid var(--warning-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.risk-danger {
+    background-color: #FFEBEE;
+    border-left-color: var(--danger-color);
+}
+
+.risk-success {
+    background-color: #E8F5E9;
+    border-left-color: var(--success-color);
 }
 
 /* ==================== Loading Overlay ==================== */
