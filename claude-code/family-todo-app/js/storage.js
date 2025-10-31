@@ -38,7 +38,16 @@ const Storage = {
         return this.migrateData(parsed);
       }
 
-      return parsed.tasks || [];
+      // Filter out any null/undefined tasks that may have been corrupted
+      const tasks = parsed.tasks || [];
+      const validTasks = tasks.filter(task => task != null && task.id && task.title);
+
+      // Log if we found corrupted data
+      if (validTasks.length !== tasks.length) {
+        console.warn(`Filtered out ${tasks.length - validTasks.length} corrupted/null tasks from storage`);
+      }
+
+      return validTasks;
     } catch (e) {
       console.error('Error reading tasks from storage:', e);
       Utils.showToast('Error loading tasks', 'error');
@@ -53,10 +62,18 @@ const Storage = {
    */
   saveTasks(tasks) {
     try {
+      // Filter out null/undefined tasks before saving
+      const validTasks = tasks.filter(task => task != null && task.id && task.title);
+
+      // Log if we're filtering out corrupted tasks
+      if (validTasks.length !== tasks.length) {
+        console.warn(`Filtered out ${tasks.length - validTasks.length} corrupted/null tasks before saving`);
+      }
+
       const data = {
         version: CONFIG.STORAGE_VERSION,
         lastModified: new Date().toISOString(),
-        tasks: tasks
+        tasks: validTasks
       };
 
       localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));

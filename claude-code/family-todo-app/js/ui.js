@@ -555,15 +555,26 @@ const UI = {
         exportType = 'all';
       }
 
+      // Filter out any null/undefined tasks
+      const validTasks = tasksToExport.filter(task => task != null && task.id && task.title);
+
+      // Log for debugging count mismatch
+      console.log('Export preparation:', {
+        totalInManager: TaskManager.tasks.length,
+        tasksToExport: tasksToExport.length,
+        validTasks: validTasks.length,
+        nullTasksFiltered: tasksToExport.length - validTasks.length
+      });
+
       // Store export data for later use
       this.pendingExport = {
-        tasks: tasksToExport,
+        tasks: validTasks,
         prefix: filenamePrefix,
         exportType: exportType
       };
 
       // Open filename modal instead of using prompt()
-      this.openFilenameModal(tasksToExport.length, filenamePrefix);
+      this.openFilenameModal(validTasks.length, filenamePrefix);
 
     } catch (e) {
       console.error('Export error:', e);
@@ -697,14 +708,17 @@ const UI = {
 
       console.log('Export successful:', filename);
 
+      // Store task count before clearing pendingExport
+      const exportedCount = this.pendingExport.tasks.length;
+
       // Mark backup completed
       Storage.markBackupCompleted();
 
-      // Close modal
+      // Close modal (this clears this.pendingExport)
       this.closeFilenameModal();
 
-      // Show success message (green toast)
-      Utils.showToast(`✓ Exported ${this.pendingExport.tasks.length} tasks to ${filename}`, 'success', 4000);
+      // Show success message with stored count
+      Utils.showToast(`✓ Exported ${exportedCount} tasks to ${filename}`, 'success', 4000);
 
     } catch (e) {
       console.error('Export error:', e);
