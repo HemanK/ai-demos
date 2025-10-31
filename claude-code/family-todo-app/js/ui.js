@@ -972,12 +972,14 @@ const UI = {
    */
   executeImport(jsonString) {
     try {
-      const result = TaskManager.importTasks(jsonString, true); // merge=true
+      // REPLACE mode (false): Replaces all existing tasks with imported tasks
+      // This matches the "Import & Replace" button text
+      const result = TaskManager.importTasks(jsonString, false);
 
       if (result.success) {
         this.renderTaskList();
         this.updateStats();
-        Utils.showToast(`Imported ${result.imported} tasks`, 'success');
+        Utils.showToast(`✓ Replaced all tasks with ${result.imported} imported tasks`, 'success', 4000);
       } else {
         Utils.showToast(`Import error: ${result.error}`, 'error');
       }
