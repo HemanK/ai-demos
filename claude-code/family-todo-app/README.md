@@ -1,15 +1,36 @@
-# 📋 GenAI Family ToDo App
+# 📋 GenAI Collaborative Task Manager
 
-A sophisticated task management application featuring multi-agent AI architecture, natural language processing, and intelligent task analysis.
+**A production-ready task management application for teams, families, events, and groups**
 
-## 🎉 What's New in v1.1.0
+Built with AI-powered natural language processing, intelligent task analysis, and seamless cross-device synchronization.
 
-**Released:** October 29, 2025
+## 🎯 Perfect For
 
-- ✨ **Configurable Names**: Member names now M1-M5 (easily customizable)
+- 👨‍👩‍👧‍👦 **Families**: Coordinate household tasks, errands, bills, and appointments
+- 🎉 **Event Planning**: Manage weddings, parties, conferences, and group activities
+- 💼 **Work Teams**: Track project tasks, deadlines, and team assignments
+- 👥 **Friend Groups**: Plan trips, split responsibilities, coordinate meetups
+- 🏠 **Roommates**: Share household duties and expense tracking
+- 📚 **Study Groups**: Manage assignments, deadlines, and collaborative projects
+
+## 🎉 What's New in v1.1.0 - Production Ready!
+
+**Released:** October 30, 2025 ✅
+**Status:** Fully tested on Mac Chrome and iPhone Chrome/Safari
+
+### Latest Updates (Oct 30, 2025)
+- ✅ **Cross-Device Sync**: Import now properly REPLACES tasks for true multi-device workflow
+- ✅ **Import Confirmation**: Review metadata (filename, date, device, task count) before importing
+- ✅ **Export Metadata**: All exports include device, browser, user, and timestamp information
+- ✅ **Data Integrity**: Automatic cleanup of corrupted/null tasks
+- ✅ **Enhanced UX**: Fixed modal layering, improved stat card visibility, better error messages
+- ✅ **Bug Fixes**: Fixed import merge bug, export null error, 404 startup errors
+
+### Core v1.1.0 Features
+- ✨ **Configurable Names**: Member names now M1-M5 (easily customizable for any group)
 - 📂 **14 Categories**: Expanded from 7 to 14 categories including Doctors, Meds, Travel, Auto Insurance, and more
 - 🏷️ **Subcategories**: Add custom subcategories to any task
-- 💾 **Smart Export**: Export filtered tasks or all tasks with custom filename
+- 💾 **Smart Export/Import**: Export with metadata, import with confirmation modal
 - 🤖 **Enhanced AI Parsing**: Better date recognition (10/31, Monday), priority vs urgency detection, smart title/description splitting
 - 📱 **Device Tracking**: Automatic device/browser detection for troubleshooting
 - 📄 **Pagination**: Clean navigation for 20+ tasks with page controls
@@ -31,19 +52,21 @@ See [CHANGELOG.md](CHANGELOG.md) for complete details.
 - ♿ **Accessible**: WCAG 2.1 Level AA compliant
 - 🔄 **Data Migration**: Automatic version upgrades with zero data loss
 
-### AI-Powered Features
+### AI-Powered Features (Available Now)
 - 🤖 **Natural Language Entry**: "Buy milk tomorrow morning" or "Pay bills 10/31 high priority" → Auto-populated task
 - 📅 **Smart Date Parsing**: Recognizes numeric dates (10/31), day names (Monday), relative dates (tomorrow)
 - 🎯 **Priority Detection**: Separate priority and urgency with smart keyword recognition
 - ✂️ **Smart Text Splitting**: Automatically splits input into title, description, and notes
 - 📱 **Device Tracking**: Tracks which device created each task
+- 📊 **Daily Briefing**: Interactive modal showing today's and tomorrow's tasks grouped by team member
+- ⚠️ **Risk Analysis**: Identifies overdue and high-priority tasks with categorized alerts
 
-### Coming Soon
-- 📅 **Daily Briefing**: AI-generated summary of today's and tomorrow's tasks
-- ⚠️ **Risk Analysis**: Identifies tasks at risk of missing deadlines
-- 🔍 **Search**: Global search across all task fields
+### Coming in v1.2.0 (P1 Features)
 - 👥 **Multi-Member Tagging**: Assign tasks to multiple people
-- 🎙️ **Voice Input**: Create tasks using voice commands
+- 🔍 **Multi-Select Filters**: Select multiple categories, priorities, or statuses at once
+- 🔎 **Global Search**: Search across all task fields with highlighting
+- 📋 **Task Templates**: Predefined task formats for common activities
+- ⌨️ **Keyboard Shortcuts**: Quick access to common actions
 
 See [ROADMAP.md](ROADMAP.md) for the complete feature roadmap.
 
@@ -88,7 +111,8 @@ Then open: `http://localhost:8000`
 
 **Filter Tasks**
 - Use the dropdown filters to show specific categories, priorities, or statuses
-- Select a family member to see only their tasks
+- Select a team/group member to see only their tasks
+- Pagination automatically shows when 20+ tasks are present
 
 **Update Task Status**
 - Click "Start" to mark a task as in-progress
@@ -96,16 +120,31 @@ Then open: `http://localhost:8000`
 - Click "Edit" to modify details
 - Click "Delete" to remove
 
-### Backup & Sync
+**AI Analysis Tools**
+- Click "📅 Daily Briefing" to see today's and tomorrow's tasks grouped by member
+- Click "⚠️ Risk Analysis" to identify overdue and high-priority tasks
+
+### Backup & Cross-Device Sync
 
 **Export Tasks**
 1. Click "📤 Export"
-2. Save the JSON file to your device
+2. Enter a custom filename (or use default: `todo-tasks-MMDD.json`)
+3. File downloads with metadata (device, date, user, task count)
+4. Save to Downloads, then upload to Google Drive/iCloud for sharing
 
-**Import Tasks**
+**Import Tasks (Replaces ALL Current Tasks)**
 1. Click "📥 Import"
-2. Select a previously exported JSON file
-3. Tasks will be merged with existing ones
+2. Select a previously exported JSON file from Downloads, iCloud, or Google Drive
+3. **Review import confirmation modal** showing:
+   - Filename
+   - Export date/time
+   - Device that created the export
+   - User who exported
+   - Task count in file vs current app
+4. Click "Import & Replace" to confirm
+5. **All current tasks are replaced** with tasks from the file
+
+**Important:** Import REPLACES all tasks, so always export before importing if you want a backup!
 
 ## 🏗️ Architecture
 
