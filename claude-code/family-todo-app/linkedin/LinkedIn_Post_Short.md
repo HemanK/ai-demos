@@ -1,32 +1,37 @@
 # LinkedIn Post - SHORT VERSION (Recommended)
 
-**Character Count:** ~650 (LinkedIn sweet spot)
+**Character Count:** ~700 (LinkedIn sweet spot)
 **Style:** Direct, authentic, technical credibility without overselling
 **Goal:** Quick engagement, open conversations
+**Status:** Updated for v1.1.0 Production Ready
 
 ---
 
 ## The Post:
 
-Built a task manager that taught me more about GenAI development than any course could.
+Built a collaborative task manager (for teams, families, events, groups) that taught me more about GenAI development than any course could.
 
 The app handles 1,000+ tasks with natural language parsing. Type "Pay bills Friday high priority" → all fields auto-populated. Works on mobile, handles data migrations, tracks device info automatically.
 
-**The interesting part wasn't the code—it was learning to work within AI tool constraints.**
+**The interesting part wasn't just the code—it was the real-world debugging.**
 
-My Claude Code session hit 120k tokens and hung. Had to design a checkpoint strategy: commit every 15-20 minutes. When it failed, recovery was seamless. Zero data loss.
+First challenge: Claude Code session hit 120k tokens and hung. Solution: commit every 15-20 minutes. Recovery was seamless. Zero data loss.
 
-This taught me something valuable: **understanding AI tool limitations and designing around them is as important as the code itself.**
+Second challenge: Cross-device sync bugs after deployment. Import was merging instead of replacing—deleted tasks reappeared, edits were lost, count mismatches everywhere. Classic production issues: null references, corrupted data, subtle parameter bugs.
 
-Building with vanilla JavaScript (no frameworks), planning multi-LLM abstraction layer next, then multi-agent architecture with daily briefings and risk analysis.
+Fixed with defensive programming: triple-layer data filtering, metadata tracking, import confirmation modal. Result: bulletproof cross-device sync.
+
+**v1.1.0 is now production-ready.** ✅
+
+Building with vanilla JavaScript (no frameworks). Next: multi-LLM abstraction layer, then multi-agent architecture.
 
 Actively exploring opportunities where production software engineering meets GenAI. 15+ years experience, ready to bring this mindset to a team.
 
 Full technical deep-dive coming soon.
 
-What's your experience working with LLM constraints? Hit token limits? Session failures? Would love to hear your stories.
+What's your experience with production debugging in AI-assisted projects? Would love to hear your stories.
 
-#GenAI #SoftwareEngineering #AI #BuildingInPublic #OpenToWork
+#GenAI #SoftwareEngineering #AI #Collaboration #BuildingInPublic #OpenToWork
 
 ---
 
@@ -57,23 +62,27 @@ What's your experience working with LLM constraints? Hit token limits? Session f
 
 ---
 
-## Alternative ULTRA-SHORT Version (450 chars):
+## Alternative ULTRA-SHORT Version (500 chars):
 
 For even more punch:
 
 ---
 
-Hit a wall building with GenAI—literally. 120,000 tokens and the session hung.
+Built a collaborative task manager with GenAI. 1,000+ tasks, natural language parsing, cross-device sync.
 
-Had to rethink everything. Started committing every 15 minutes. When it crashed, recovery was instant. Zero data loss.
+Two big lessons:
 
-Built a 1,000+ task manager with natural language parsing along the way. But the real learning? Understanding AI tool constraints matters as much as the code.
+1. Claude Code hit 120k tokens and hung. Solution: commit every 15 minutes. Recovery: instant. Data loss: zero.
 
-15+ years in software, now focused on GenAI. Exploring opportunities.
+2. Cross-device sync bugs in production. Import merging instead of replacing. Fixed with defensive programming and metadata tracking.
 
-What constraints have you hit building with LLMs?
+**v1.1.0 production-ready** ✅
 
-#GenAI #AI #OpenToWork
+15+ years in software, now focused on GenAI + production systems. Exploring opportunities.
+
+What production bugs taught you the most?
+
+#GenAI #AI #Collaboration #OpenToWork
 
 ---
 

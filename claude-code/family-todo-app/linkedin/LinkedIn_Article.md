@@ -1,18 +1,19 @@
-# Building a GenAI-Powered Task Manager: A Technical Deep-Dive
+# Building a GenAI-Powered Collaborative Task Manager: A Technical Deep-Dive
 
-**Subtitle:** Lessons learned from production-ready AI development, token management, and multi-agent architecture
+**Subtitle:** Lessons learned from production-ready AI development, cross-device sync debugging, and multi-agent architecture
 
 **Author:** [Your Name]
 **Date:** October 2025
-**Read Time:** ~12 minutes
+**Read Time:** ~14 minutes
+**Status:** v1.1.0 Production Ready ✅
 
 ---
 
 ## Introduction: Why Another Task Manager?
 
-After 15+ years in software engineering, I wanted to truly understand GenAI development—not by taking courses or reading papers, but by building something production-ready. The result is a task management application that handles 1,000+ tasks with natural language processing, automatic data migration, and a foundation for multi-agent AI architecture.
+After 15+ years in software engineering, I wanted to truly understand GenAI development—not by taking courses or reading papers, but by building something production-ready. The result is a collaborative task management application for teams, families, events, and groups that handles 1,000+ tasks with natural language processing, automatic data migration, cross-device sync, and a foundation for multi-agent AI architecture.
 
-But here's what makes this interesting: **the technical challenges weren't just about the code**. They were about understanding how to work effectively with AI development tools that have real constraints—token limits, context windows, session failures—and designing around them.
+But here's what makes this interesting: **the technical challenges weren't just about the code**. They were about understanding how to work effectively with AI development tools that have real constraints—token limits, context windows, session failures—and then dealing with real-world production bugs like cross-device sync failures, data corruption, and null reference errors.
 
 This article shares both the application architecture and the meta-lessons about building with AI in 2025.
 
@@ -301,7 +302,85 @@ These are valuable skills for **any** AI-assisted development, not just Claude C
 
 ---
 
-## Part 4: What's Next (Roadmap)
+## Part 4: Production Debugging - The Real Learning
+
+After completing v1.1.0, I deployed it and started cross-device testing (Mac ↔ iPhone). This is where the **real** engineering lessons happened.
+
+### The Bug: Import Was Merging Instead of Replacing
+
+**What Users Reported:**
+- "I deleted tasks on my Mac, but they still appear on my iPhone after import"
+- "I edited a task on Mac, but the changes don't show up on iPhone"
+- "The dashboard shows 51 pending tasks, but the export file only has 45"
+
+**Root Cause Analysis:**
+
+The import function had a single-character bug:
+
+```javascript
+// WRONG (what I shipped):
+const result = TaskManager.importTasks(jsonString, true);  // merge=true
+
+// CORRECT:
+const result = TaskManager.importTasks(jsonString, false);  // REPLACE mode
+```
+
+That `true` parameter meant imported tasks were **merged** with existing data instead of **replacing** it. Cross-device sync requires REPLACE, not merge.
+
+**Impact:**
+- Users couldn't reliably sync between devices
+- Deleted tasks would "resurrect" after import
+- Edits would be lost
+- Task counts would never match
+
+### The Fix: Defensive Programming
+
+The solution wasn't just fixing that one parameter. I implemented **triple-layer data filtering**:
+
+1. **On Load:** Filter corrupted tasks when reading from localStorage
+2. **On Save:** Filter before writing to localStorage
+3. **On Export:** Filter before creating JSON file
+
+```javascript
+// storage.js - getTasks()
+const validTasks = tasks.filter(task =>
+  task != null && task.id && task.title
+);
+
+if (validTasks.length !== tasks.length) {
+  console.warn(`Filtered out ${tasks.length - validTasks.length} corrupted tasks`);
+}
+```
+
+**Additional Fixes:**
+
+1. **Export Metadata:** Added device, browser, user, timestamp to every export
+2. **Import Confirmation Modal:** Show metadata before replacing data
+3. **Null Reference Bugs:** Fixed accessing cleared variables in multiple places
+4. **404 Errors:** Removed script tags for non-existent files
+
+**Result:**
+- ✅ Perfect cross-device sync (Export on Mac → Import on iPhone)
+- ✅ Automatic cleanup of corrupted data
+- ✅ Users can review what they're importing
+- ✅ Zero data loss
+
+### Meta-Lesson: Production Testing Reveals Truth
+
+Building features is fun. **Debugging production issues is where you learn engineering.**
+
+This experience taught me:
+- Always test cross-device workflows (not just same device)
+- Defensive programming: assume data can be corrupted
+- Metadata is invaluable for debugging
+- User confirmation dialogs prevent mistakes
+- Console logging helps diagnose issues quickly
+
+The bugs weren't complex—they were **subtle**. A `true` instead of `false`. Accessing a variable after clearing it. Classic mistakes that only appear in real-world usage.
+
+---
+
+## Part 5: What's Next (Roadmap)
 
 ### P1 Features (Next Session)
 - **Multi-member task tagging:** Assign tasks to multiple people
@@ -341,7 +420,7 @@ These are valuable skills for **any** AI-assisted development, not just Claude C
 
 ---
 
-## Part 5: Key Learnings
+## Part 6: Key Learnings
 
 ### Technical Lessons
 
@@ -350,6 +429,8 @@ These are valuable skills for **any** AI-assisted development, not just Claude C
 3. **Mobile-first design** forces good UX decisions
 4. **Accessibility should be default**, not an afterthought
 5. **Versioned storage** enables fearless data model changes
+6. **Cross-device testing is essential** for sync features
+7. **Defensive programming prevents data corruption**
 
 ### AI Development Lessons
 
@@ -359,16 +440,25 @@ These are valuable skills for **any** AI-assisted development, not just Claude C
 4. **Understand tool constraints** and design around them
 5. **Token management** is a real skill
 
+### Production Debugging Lessons
+
+1. **Test on actual devices** (not just browser dev tools)
+2. **Metadata is invaluable** for debugging user issues
+3. **Filter corrupted data at every layer** (load, save, export)
+4. **User confirmation modals** prevent costly mistakes
+5. **Console logging** is worth the effort
+
 ### Meta Lessons
 
 1. **Building teaches more than reading** about AI
 2. **Constraints drive creativity** (token limits → checkpoint strategy)
 3. **Production-ready matters** (not just prototypes)
-4. **The journey is the learning** (failure/recovery taught me most)
+4. **Real bugs teach more than tutorials** (cross-device sync bugs revealed blind spots)
+5. **The journey is the learning** (failure/recovery/debugging taught me most)
 
 ---
 
-## Part 6: Why This Matters for Hiring
+## Part 7: Why This Matters for Hiring
 
 If you're evaluating candidates for AI-native development roles, here's what to look for:
 
@@ -388,18 +478,22 @@ I'm actively looking for opportunities to bring this mindset to a team.
 
 ---
 
-## Conclusion: Building in Public
+## Part 8: Conclusion - Building in Public
 
-This project taught me more about GenAI development than any course could. The technical skills (JavaScript, AI integration) are important, but the **meta-skills** (working with constraints, systematic workflows, resilient design) are what will matter as AI tools evolve.
+This project taught me more about GenAI development than any course could. The technical skills (JavaScript, AI integration) are important, but the **meta-skills** (working with constraints, systematic workflows, resilient design, production debugging) are what will matter as AI tools evolve.
+
+**v1.1.0 is now production-ready** after two development sessions and comprehensive cross-device testing. All critical bugs fixed, data integrity ensured, cross-device sync working perfectly.
 
 I'm documenting this journey publicly because:
-1. **Transparency builds trust** (potential employers see how I think)
+1. **Transparency builds trust** (potential employers see how I think and debug)
 2. **Community learning** (others face these challenges too)
 3. **Feedback loops** (your comments will shape P1/P2/P3)
+4. **Authentic story** (including the bugs and fixes, not just the wins)
 
 **What's your experience with AI-assisted development?**
 - Have you hit token limits or context window issues?
-- What strategies work for you?
+- What production bugs surprised you after deployment?
+- How do you handle cross-device sync and data integrity?
 - What projects are you building?
 
 Let's learn together. Drop a comment or DM—I'd love to hear your stories.
